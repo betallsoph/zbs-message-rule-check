@@ -115,11 +115,8 @@ export default function App() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-xl font-black tracking-tight sm:text-2xl">
-              ZBS Rule Check
+              Zalo Business Message Rule Check by antt
             </h1>
-            <p className="text-xs font-semibold text-zinc-500">
-              Kiểm duyệt mẫu tin nhắn · 10 check tự động + checklist người
-            </p>
           </div>
           <button
             onClick={() => setShowRules(true)}
@@ -301,11 +298,6 @@ function ResultPanel({
       {result.warnings.length > 0 && (
         <FindingGroup title="Cảnh báo" findings={result.warnings} />
       )}
-      {result.errors.length === 0 && result.warnings.length === 0 && (
-        <p className="py-8 text-center text-sm font-bold text-zinc-400">
-          Sạch 10 check tự động.
-        </p>
-      )}
 
       <HumanChecklist items={result.checklist} />
     </section>
@@ -363,45 +355,42 @@ function FindingRow({ f }: { f: Finding }) {
 }
 
 // ── Human review checklist ─────────────────────────────────────────
+// Chỉ hiện chi tiết các mục CÓ DẤU HIỆU; các mục còn lại gom 1 dòng gọn
+// để đỡ rối (checklist nhắc, không phải danh sách bắt buộc đọc từng dòng).
 function HumanChecklist({ items }: { items: ModerationResult['checklist'] }) {
-  const triggered = items.filter((i) => i.triggered).length
+  const flagged = items.filter((i) => i.triggered)
+  const rest = items.filter((i) => !i.triggered)
   return (
-    <div>
+    <div className="mt-2 border-t-2 border-black/15 pt-4">
       <p className="mb-1 text-sm font-black text-blue-600">
         Cần người kiểm duyệt
-        {triggered > 0 && (
-          <span className="font-bold text-zinc-400">
-            {' · '}
-            {triggered} mục có dấu hiệu
-          </span>
-        )}
+        <span className="font-bold text-zinc-400">
+          {' · '}
+          {flagged.length} mục có dấu hiệu
+        </span>
       </p>
-      {items.map((it) => (
-        <div key={it.rule} className="border-b border-black/10 py-3">
+
+      {flagged.map((it) => (
+        <div key={it.rule} className="border-b border-black/10 py-2.5">
           <div className="flex items-center gap-2">
-            <span
-              className={`h-2 w-2 shrink-0 rounded-full ${
-                it.triggered ? 'bg-purple-500' : 'bg-zinc-300'
-              }`}
-            />
+            <span className="h-2 w-2 shrink-0 rounded-full bg-purple-500" />
             <span className="text-sm font-black text-black">{it.label}</span>
-            <span className="ml-auto shrink-0 text-[10px] font-bold text-zinc-400">
+            <span className="ml-auto shrink-0 text-[10px] font-black text-purple-600">
               {it.rule}
-              {it.triggered && (
-                <span className="ml-1 font-black text-purple-600">
-                  · có dấu hiệu
-                </span>
-              )}
             </span>
           </div>
-          <p className="mt-1 text-xs font-semibold text-zinc-500">{it.note}</p>
-          {it.triggered && it.hint && (
-            <p className="mt-1 text-[11px] font-bold text-purple-700">
-              {it.hint}
-            </p>
-          )}
+          <p className="mt-1 text-[11px] font-bold text-purple-700">
+            {it.hint ?? it.note}
+          </p>
         </div>
       ))}
+
+      {rest.length > 0 && (
+        <p className="mt-2 text-[11px] leading-relaxed font-semibold text-zinc-400">
+          {flagged.length > 0 ? 'Đối chiếu thêm khi phát hành: ' : 'Cần đối chiếu khi phát hành: '}
+          {rest.map((it) => `${it.label} (${it.rule})`).join(' · ')}
+        </p>
+      )}
     </div>
   )
 }
