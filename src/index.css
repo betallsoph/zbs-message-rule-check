@@ -1,0 +1,189 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'Google Sans';
+  src: url('/fonts/GoogleSansOTF/GoogleSans-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Google Sans';
+  src: url('/fonts/GoogleSansOTF/GoogleSans-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Google Sans';
+  src: url('/fonts/GoogleSansOTF/GoogleSans-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'Google Sans', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* anttxqt-style offset shadows */
+  --shadow-primary: 4px 4px 0px -1px #000000;
+  --shadow-secondary: 2px 2px 0px -1px #000000;
+  --shadow-secondary-opposite: -2px 2px 0px -1px #000000;
+
+  /* Neobrutalism Colors */
+  --color-primary-blue: rgb(147, 197, 253);
+  --color-primary-dark: rgb(96, 165, 250);
+  --color-primary-light: rgb(219, 234, 254);
+  --color-primary-lighter: rgb(239, 246, 255);
+  --color-primary-medium: rgb(191, 219, 254);
+}
+
+@layer base {
+  body {
+    @apply bg-white text-black antialiased;
+    font-family: 'Google Sans', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  button,
+  a {
+    touch-action: manipulation;
+  }
+}
+
+/* ── Reusable surfaces (theo roomio-web/layout.css) ────────────────── */
+.roomio-grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(156, 163, 175, 0.22) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(156, 163, 175, 0.22) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.roomio-window {
+  @apply overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary;
+}
+.roomio-window-bar {
+  @apply flex items-center gap-3 border-b-2 border-black bg-zinc-100 px-3 py-2.5 sm:px-4;
+}
+.roomio-window-dots {
+  @apply flex items-center gap-1.5;
+}
+.roomio-window-dot {
+  @apply h-3 w-3 rounded-full border border-black;
+}
+
+.roomio-button {
+  --tap-depth: 2px;
+  --tap-shadow: var(--shadow-primary);
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-[6px] border-2 border-black bg-blue-300 px-4 py-2 text-sm font-bold text-black shadow-primary transition-all disabled:pointer-events-none disabled:opacity-50;
+}
+.roomio-button-white {
+  --tap-depth: 2px;
+  --tap-shadow: var(--shadow-primary);
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-[6px] border-2 border-black bg-white px-4 py-2 text-sm font-bold text-black shadow-primary transition-all disabled:pointer-events-none disabled:opacity-50;
+}
+
+/* ── Tap physics ───────────────────────────────────────────────────── */
+[class*='shadow-primary'] {
+  --tap-depth: 2px;
+  --tap-shadow: var(--shadow-primary);
+}
+[class*='shadow-secondary'] {
+  --tap-depth: 1px;
+  --tap-shadow: var(--shadow-secondary);
+}
+
+:where(button, a, [role='button']):where(
+    [class*='shadow-primary'],
+    [class*='shadow-secondary'],
+    .roomio-button,
+    .roomio-button-white
+  ) {
+  transition-property: background-color, border-color, color, opacity, transform, box-shadow;
+  transition-duration: 150ms, 150ms, 150ms, 150ms, 200ms, 200ms;
+  transition-timing-function: ease, ease, ease, ease,
+    cubic-bezier(0.34, 1.56, 0.64, 1), cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+:where(button, a, [role='button']):where(
+    [class*='shadow-primary'],
+    [class*='shadow-secondary'],
+    .roomio-button,
+    .roomio-button-white
+  ):active {
+  transform: translate(var(--tap-depth, 1px), var(--tap-depth, 1px)) !important;
+  box-shadow: none !important;
+  transition: transform 80ms ease, box-shadow 80ms ease !important;
+}
+
+.tap-bounce {
+  animation: tap-bounce 250ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.tap-sink {
+  transform: translate(var(--tap-depth, 1px), var(--tap-depth, 1px)) !important;
+  box-shadow: none !important;
+  transition: transform 80ms ease, box-shadow 80ms ease !important;
+}
+
+@keyframes tap-bounce {
+  0% { transform: translate(var(--tap-depth, 1px), var(--tap-depth, 1px)); box-shadow: none; }
+  1% { transform: translate(calc(var(--tap-depth, 1px) - 0.05px), calc(var(--tap-depth, 1px) - 0.05px)); box-shadow: var(--tap-shadow, var(--shadow-secondary)); }
+  50% { transform: translate(-0.5px, -0.5px); box-shadow: var(--tap-shadow, var(--shadow-secondary)); }
+  100% { transform: translate(0, 0); box-shadow: var(--tap-shadow, var(--shadow-secondary)); }
+}
+
+/* ── Radial "wow" hover (toolbar / modal primary actions) ──────────── */
+:is(.toolbar-action, .modal-action) {
+  --hover-x: 50%;
+  --hover-y: 50%;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+:is(.toolbar-action, .modal-action)::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: #fff;
+  clip-path: circle(0 at var(--hover-x) var(--hover-y));
+  content: '';
+  transition: clip-path 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:is(.toolbar-action, .modal-action):not(:disabled):hover::before {
+  clip-path: circle(160% at var(--hover-x) var(--hover-y));
+}
+:is(.toolbar-action-label, .modal-action-label) {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  transform-origin: center;
+  transition: color 150ms ease;
+}
+:is(.toolbar-action, .modal-action):not(:disabled):hover
+  :is(.toolbar-action-label, .modal-action-label) {
+  color: #2563eb;
+  font-weight: 900;
+  animation: toolbar-action-label-pop 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-action > svg {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes toolbar-action-label-pop {
+  0%, 100% { transform: scale(1); }
+  52% { transform: scale(1.08); }
+}
+
+@keyframes scale-up {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* ── Scrollbar + selection ─────────────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #93c5fd; border: 2px solid black; }
+::-webkit-scrollbar-thumb:hover { background: #60a5fa; }
+::selection { background: rgb(147, 197, 253); color: black; }
