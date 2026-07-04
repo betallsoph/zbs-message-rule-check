@@ -1,4 +1,4 @@
-import type { ZbsTemplate, TemplateType, InputFormat } from './types'
+import type { ZbsTemplate, ZbsButton, TemplateType, InputFormat } from './types'
 
 // ═══════════════════════════════════════════════════════════════════
 //  Input adapter — nhận diện & chuẩn hoá JSON đầu vào.
@@ -8,7 +8,33 @@ import type { ZbsTemplate, TemplateType, InputFormat } from './types'
 //  Cả hai được đưa về cùng một ZbsTemplate để chạy 10 check.
 // ═══════════════════════════════════════════════════════════════════
 
+// ── Kiểu JSON đệ quy — thay cho `unknown`/`any` khi duyệt cây ────────
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue }
+export type JsonObject = { [key: string]: JsonValue }
+
+export function isJsonObject(v: JsonValue | undefined): v is JsonObject {
+  return typeof v === 'object' && v !== null && !Array.isArray(v)
+}
+function asString(v: JsonValue | undefined): string {
+  return typeof v === 'string' ? v : ''
+}
+
 const URL_RE = /https?:\/\/[^\s"'<>]+/gi
+const CTA_URL_KEYS = new Set(['data', 'c_data', 'data_detail', 'click_extend_info'])
+const BODY_TEXT_KEYS = new Set([
+  'text',
+  'paragraph',
+  'c_title',
+  'c_paragraph',
+  'des',
+  'title',
+])
 
 // Map loại template (dropdown) → Tag theo rule map.
 //  Giao dịch = Tag 1 · Chăm sóc KH = Tag 2 · Hậu mãi = Tag 3
@@ -35,17 +61,17 @@ export function tagOfType(type: TemplateType): string {
 }
 
 // Nhận diện: có "root" hoặc "sections" → JSON ZBS thật.
-export function detectFormat(parsed: unknown): InputFormat {
-  if (parsed && typeof parsed === 'object') {
-    const o = parsed as Record<string, unknown>
-    if (o.root || o.sections) return 'zbs'
-  }
+export function detectFormat(parsed: JsonValue): InputFormat {
+  if (isJsonObject(parsed) && ('root' in parsed || 'sections' in parsed))
+    return 'zbs'
   return 'flat'
 }
 
 // Loại bỏ wrapper HTML mà ZBS hay bọc quanh tham số: <span class="param">…</span>
+// LƯU Ý: chỉ strip <span> (định dạng thật trong dữ liệu). KHÔNG strip HTML
+// tổng quát vì biến 1 từ như <otp>, <price> trông y hệt thẻ HTML → sẽ mất biến.
 function stripHtml(s: string): string {
-  return s.replace(/<\/?span[^>]*>/gi, '')
+  return s.replace(/<\/?span\b[^>]*>/gi, '')
 }
 
 interface Extracted {
@@ -54,68 +80,64 @@ interface Extracted {
   hasLogo: boolean
 }
 
+// map_info: ghép nhãn (key) + giá trị (value) trên CÙNG một dòng để giữ
+// quan hệ "nhãn → biến" (tránh cờ sai G9 khi biến nằm ở dòng value riêng).
+function collectMapInfo(mapInfo: JsonValue | undefined, acc: Extracted): void {
+  if (!isJsonObject(mapInfo)) return
+  const items = mapInfo.items
+  if (!Array.isArray(items)) return
+  for (const item of items) {
+    const keyText = deepText(item, ['key', 'title', 'text'])
+    const valText = deepText(item, ['value', 'title', 'text'])
+    const line = [keyText, valText].filter(Boolean).join(' ')
+    if (line) acc.bodyTexts.push(line)
+  }
+}
+
 // Duyệt cây root.sections[], gom text nội dung + URL trong CTA + cờ logo.
-function extract(root: unknown): Extracted {
+function extract(root: JsonValue): Extracted {
   const acc: Extracted = { bodyTexts: [], ctaUrls: [], hasLogo: false }
 
-  const pushUrls = (s: string) => {
-    const us = s.match(URL_RE)
-    if (us) acc.ctaUrls.push(...us)
+  const pushUrls = (s: string): void => {
+    const matches = s.match(URL_RE)
+    if (matches) acc.ctaUrls.push(...matches)
   }
 
-  const walk = (node: unknown, inButtons: boolean) => {
+  const walk = (node: JsonValue, inButtons: boolean): void => {
     if (Array.isArray(node)) {
-      node.forEach((n) => walk(n, inButtons))
+      for (const child of node) walk(child, inButtons)
       return
     }
-    if (!node || typeof node !== 'object') return
-    const obj = node as Record<string, unknown>
+    if (!isJsonObject(node)) return
 
-    // Có logo / OA info / ảnh banner → phục vụ checklist G10.
-    if ('logo' in obj || 'oa_info' in obj) acc.hasLogo = true
-    if (obj.img && typeof obj.img === 'object') acc.hasLogo = true
+    // Có logo / OA info / ảnh → phục vụ checklist G10.
+    if ('logo' in node || 'oa_info' in node || isJsonObject(node.img))
+      acc.hasLogo = true
 
-    for (const [k, v] of Object.entries(obj)) {
-      const nowInButtons = inButtons || k === 'buttons' || k === 'c_buttons'
+    for (const key of Object.keys(node)) {
+      const value = node[key]
+      const nowInButtons =
+        inButtons || key === 'buttons' || key === 'c_buttons'
 
-      // map_info: ghép nhãn (key) + giá trị (value) trên CÙNG một dòng
-      // để giữ quan hệ "nhãn → biến" (tránh cờ sai G9).
-      if (k === 'map_info' && v && typeof v === 'object') {
-        const items = (v as Record<string, unknown>).items
-        if (Array.isArray(items)) {
-          for (const it of items) {
-            const keyText = deepText(it, ['key', 'title', 'text'])
-            const valText = deepText(it, ['value', 'title', 'text'])
-            const line = [keyText, valText].filter(Boolean).join(' ')
-            if (line) acc.bodyTexts.push(line)
-          }
-        }
-        continue // không duyệt sâu vào map_info nữa
+      if (key === 'map_info') {
+        collectMapInfo(value, acc) // không duyệt sâu vào map_info nữa
+        continue
       }
 
       // Text nội dung (không nằm trong nút CTA).
       if (
         !nowInButtons &&
-        typeof v === 'string' &&
-        (k === 'text' ||
-          k === 'paragraph' ||
-          k === 'c_title' ||
-          k === 'c_paragraph' ||
-          k === 'des' ||
-          (k === 'title' && v.length > 0))
+        typeof value === 'string' &&
+        value.length > 0 &&
+        BODY_TEXT_KEYS.has(key)
       ) {
-        acc.bodyTexts.push(v)
+        acc.bodyTexts.push(value)
       }
 
       // URL trong click/CTA (mọi vị trí).
-      if (
-        typeof v === 'string' &&
-        (k === 'data' || k === 'c_data' || k === 'data_detail' || k === 'click_extend_info')
-      ) {
-        pushUrls(v)
-      }
+      if (typeof value === 'string' && CTA_URL_KEYS.has(key)) pushUrls(value)
 
-      walk(v, nowInButtons)
+      walk(value, nowInButtons)
     }
   }
 
@@ -123,55 +145,68 @@ function extract(root: unknown): Extracted {
   return acc
 }
 
-// Lấy chuỗi tại đường dẫn lồng, an toàn với NULL/thiếu key.
-function deepText(node: unknown, path: string[]): string {
-  let cur: unknown = node
-  for (const p of path) {
-    if (!cur || typeof cur !== 'object') return ''
-    cur = (cur as Record<string, unknown>)[p]
+// Lấy chuỗi tại đường dẫn lồng, an toàn với null / thiếu key ở bất kỳ tầng nào.
+function deepText(node: JsonValue, path: string[]): string {
+  let cur: JsonValue | undefined = node
+  for (const key of path) {
+    if (!isJsonObject(cur)) return ''
+    cur = cur[key]
   }
   return typeof cur === 'string' ? cur : ''
 }
 
 // Chuẩn hoá JSON ZBS thật → ZbsTemplate.
-export function normalizeZbs(
-  parsed: Record<string, unknown>,
-  type: TemplateType,
-): ZbsTemplate {
-  const root = (parsed.root ?? parsed) as Record<string, unknown>
+export function normalizeZbs(parsed: JsonObject, type: TemplateType): ZbsTemplate {
+  // root có thể thiếu / null / sai kiểu → fallback duyệt chính object gốc.
+  const root = isJsonObject(parsed.root) ? parsed.root : parsed
   const { bodyTexts, ctaUrls, hasLogo } = extract(root)
 
-  const content = stripHtml(bodyTexts.join('\n'))
-  const id = typeof root.extend_info === 'string' ? root.extend_info : undefined
-
   return {
-    id,
+    id: asString(root.extend_info) || undefined,
     type,
     tag: tagOfType(type),
-    content,
+    content: stripHtml(bodyTexts.join('\n')),
     buttons: ctaUrls.map((url) => ({ url })),
     hasLogo,
     otpExempt: type === 'otp',
   }
 }
 
+// ── Guard cho schema phẳng (dữ liệu người dùng có thể méo mó) ────────
+function toButtons(value: JsonValue | undefined): ZbsButton[] {
+  if (!Array.isArray(value)) return []
+  const out: ZbsButton[] = []
+  for (const b of value) {
+    if (!isJsonObject(b)) continue // bỏ qua null / string / number lẫn trong mảng
+    out.push({
+      type: typeof b.type === 'string' ? b.type : undefined,
+      title: typeof b.title === 'string' ? b.title : undefined,
+      url: typeof b.url === 'string' ? b.url : undefined,
+      phone: typeof b.phone === 'string' ? b.phone : undefined,
+    })
+  }
+  return out
+}
+function toStringArray(value: JsonValue | undefined): string[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  return value.filter((x): x is string => typeof x === 'string')
+}
+
 // Chuẩn hoá schema phẳng → ZbsTemplate (giữ tương thích cũ).
-export function normalizeFlat(
-  parsed: Record<string, unknown>,
-  type: TemplateType,
-): ZbsTemplate {
+export function normalizeFlat(parsed: JsonObject, type: TemplateType): ZbsTemplate {
+  const content = asString(parsed.content)
   return {
-    id: typeof parsed.id === 'string' ? parsed.id : undefined,
+    id: asString(parsed.id) || undefined,
     type,
     // Ưu tiên tag ghi sẵn trong JSON; nếu không có, lấy theo loại đã chọn.
     tag: typeof parsed.tag === 'string' ? parsed.tag : tagOfType(type),
-    content: typeof parsed.content === 'string' ? stripHtml(parsed.content) : '',
-    buttons: Array.isArray(parsed.buttons) ? (parsed.buttons as ZbsTemplate['buttons']) : [],
-    params: Array.isArray(parsed.params) ? (parsed.params as string[]) : undefined,
+    content: stripHtml(content),
+    buttons: toButtons(parsed.buttons),
+    params: toStringArray(parsed.params),
     hasLogo:
       typeof parsed.hasLogo === 'boolean'
         ? parsed.hasLogo
-        : /logo/i.test(String(parsed.content ?? '')),
+        : /logo/i.test(content),
     otpExempt: type === 'otp',
   }
 }

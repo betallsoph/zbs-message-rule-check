@@ -12,9 +12,10 @@ import type {
 // ═══════════════════════════════════════════════════════════════════
 
 // Gom toàn bộ URL trong các nút CTA (để loại trừ khỏi check "URL trong body").
+// Phòng thủ với phần tử button méo mó (null / thiếu url) từ input người dùng.
 function buttonUrls(t: ZbsTemplate): string[] {
   return (t.buttons ?? [])
-    .map((b) => b.url ?? '')
+    .map((b) => (b && typeof b.url === 'string' ? b.url : ''))
     .filter(Boolean)
 }
 
@@ -32,7 +33,7 @@ const ACCOUNT_CTX = /(tài\s*khoản|\bstk\b|\bsố\s*tk\b|account)/i
 function checkPhoneInBody(t: ZbsTemplate): Finding[] {
   // Hotline 1800/1900 hoặc số di động/cố định VN 9-11 chữ số (cho phép . - space).
   const re =
-    /(?:\+?84|0)(?:[\s.\-]?\d){8,10}|\b1[89]00[\s.\-]?\d{3,6}\b/g
+    /(?:\+?84|0)(?:[\s.-]?\d){8,10}|\b1[89]00[\s.-]?\d{3,6}\b/g
   const hits: string[] = []
   let m: RegExpExecArray | null
   while ((m = re.exec(t.content))) {
@@ -228,8 +229,11 @@ function checkParamNoPrefix(t: ZbsTemplate): Finding[] {
 }
 
 // ── 8. EMOJI_SPECIAL (G5) — emoji / ký tự trang trí ───────────────
+// LƯU Ý: KHÔNG dùng nguyên khối General Punctuation (U+2000–206F) vì nó chứa
+// dấu câu hợp lệ (em-dash "—", "…", nháy cong "" ''), sẽ báo nhầm là emoji.
+// Chỉ lấy đúng vài ký tự trang trí cần chặn (‼ ⁉ •) + các dải emoji thật.
 const EMOJI_RE =
-  /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{25A0}-\u{25FF}\u{2000}-\u{206F}️•★☆❤✔✖❌✨‼⁉]/u
+  /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{25A0}-\u{25FF}•★☆‼⁉❤✔✖❌✨]/u
 function checkEmojiSpecial(t: ZbsTemplate): Finding[] {
   // Bỏ dòng chỉ chứa khoảng trắng thường; bắt emoji + ký tự trang trí.
   const chars = [...t.content].filter((c) => {

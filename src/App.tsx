@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import {
   ShieldCheck,
   BookOpen,
@@ -14,8 +14,10 @@ import type {
   InputFormat,
   Finding,
 } from './lib/types'
+import type { JsonValue } from './lib/adapter'
 import {
   detectFormat,
+  isJsonObject,
   normalizeZbs,
   normalizeFlat,
   TEMPLATE_TYPES,
@@ -24,7 +26,7 @@ import { SAMPLES, DEFAULT_SAMPLE } from './lib/samples'
 import { RulesModal } from './components/RulesModal'
 import { installTapInteractions } from './lib/tapInteractions'
 
-function toJson(v: unknown) {
+function toJson(v: unknown): string {
   return JSON.stringify(v, null, 2)
 }
 
@@ -36,41 +38,57 @@ type ParseState =
 const PSEUDO_RE = /(string"|bool(true|false)|\{\d+ item|\[\d+ item|:NULL)/
 
 function analyze(raw: string, type: TemplateType): ParseState {
-  if (PSEUDO_RE.test(raw)) {
+  const trimmed = raw.trim()
+  if (!trimmed) return { ok: false, error: 'Chưa có nội dung JSON.' }
+  if (PSEUDO_RE.test(trimmed)) {
     return {
       ok: false,
       error:
         'Đây là format hiển thị của sheet (string"…", "{7 items"…), không phải JSON chuẩn. Hãy dán JSON thật (có "root" / "sections").',
     }
   }
-  let parsed: unknown
+
+  // Ranh giới duy nhất mà dữ liệu là `any` — JSON.parse. Ép về JsonValue rồi
+  // từ đó trở đi mọi thứ đều có kiểu chặt chẽ.
+  let parsed: JsonValue
   try {
-    parsed = JSON.parse(raw)
+    parsed = JSON.parse(trimmed) as JsonValue
   } catch (e) {
     return { ok: false, error: 'JSON không hợp lệ: ' + (e as Error).message }
   }
-  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed))
+  if (!isJsonObject(parsed))
     return { ok: false, error: 'JSON phải là một object mẫu tin.' }
 
   const format = detectFormat(parsed)
-  const obj = parsed as Record<string, unknown>
-  const template =
-    format === 'zbs' ? normalizeZbs(obj, type) : normalizeFlat(obj, type)
 
-  if (!template.content && (!template.buttons || template.buttons.length === 0))
+  // Chuẩn hoá + chấm điểm được bọc try/catch: dữ liệu méo mó bất thường
+  // (lồng sâu, kiểu sai) không được làm sập app — chỉ báo lỗi mềm.
+  try {
+    const template =
+      format === 'zbs'
+        ? normalizeZbs(parsed, type)
+        : normalizeFlat(parsed, type)
+
+    if (!template.content && !template.buttons?.length)
+      return {
+        ok: false,
+        error:
+          format === 'zbs'
+            ? 'Không trích được nội dung nào từ root.sections[].'
+            : 'Thiếu trường "content" (nội dung mẫu).',
+      }
+    return { ok: true, result: moderate(template), format }
+  } catch (e) {
     return {
       ok: false,
-      error:
-        format === 'zbs'
-          ? 'Không trích được nội dung nào từ root.sections[].'
-          : 'Thiếu trường "content" (nội dung mẫu).',
+      error: 'Không xử lý được dữ liệu mẫu: ' + (e as Error).message,
     }
-  return { ok: true, result: moderate(template), format }
+  }
 }
 
 export default function App() {
-  const [input, setInput] = useState(() => toJson(DEFAULT_SAMPLE.raw))
-  const [activeKey, setActiveKey] = useState(DEFAULT_SAMPLE.key)
+  const [input, setInput] = useState<string>(() => toJson(DEFAULT_SAMPLE.raw))
+  const [activeKey, setActiveKey] = useState<string>(DEFAULT_SAMPLE.key)
   const [templateType, setTemplateType] = useState<TemplateType>(
     DEFAULT_SAMPLE.type,
   )
@@ -78,10 +96,14 @@ export default function App() {
 
   useEffect(() => installTapInteractions(), [])
 
+  // Gõ vào textarea cập nhật `input` ngay (UI mượt), nhưng phần phân tích nặng
+  // chỉ chạy trên giá trị đã hoãn (deferred) → tránh re-render nặng mỗi phím.
+  const deferredInput = useDeferredValue(input)
   const state = useMemo(
-    () => analyze(input, templateType),
-    [input, templateType],
+    () => analyze(deferredInput, templateType),
+    [deferredInput, templateType],
   )
+  const isStale = deferredInput !== input
 
   function loadSample(key: string) {
     const s = SAMPLES.find((x) => x.key === key)
@@ -112,7 +134,7 @@ export default function App() {
             onChangeType={setTemplateType}
             onLoadSample={loadSample}
           />
-          <ResultWindow state={state} />
+          <ResultWindow state={state} isStale={isStale} />
         </div>
 
         <p className="mt-10 text-center text-[11px] font-semibold text-zinc-400">
@@ -281,7 +303,13 @@ const STATUS = {
   },
 } as const
 
-function ResultWindow({ state }: { state: ParseState }) {
+function ResultWindow({
+  state,
+  isStale,
+}: {
+  state: ParseState
+  isStale: boolean
+}) {
   if (!state.ok) {
     return (
       <section className="roomio-window flex flex-col">
@@ -312,7 +340,11 @@ function ResultWindow({ state }: { state: ParseState }) {
           <span className={`text-xs font-black ${s.text}`}>{s.word}</span>
         }
       />
-      <div className="p-4">
+      <div
+        className={`p-4 transition-opacity duration-150 ${
+          isStale ? 'opacity-60' : 'opacity-100'
+        }`}
+      >
         {/* Status banner — slim, single tinted row */}
         <div
           className={`flex items-center gap-2.5 rounded-lg border-l-4 px-3.5 py-2.5 ${s.banner}`}
