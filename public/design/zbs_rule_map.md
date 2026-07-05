@@ -1,118 +1,124 @@
-# ZBS Template Moderation — Rule Map (Step 1)
+# ZBS Template Moderation - Rule Map (Challenge 2)
 
-Nguồn: *Quy định chung khi kiểm duyệt mẫu tin nhắn ZBS* (zalo.solutions) + đối chiếu 10 mẫu thật trong sheet "Sample json" của file đề.
+Nguồn chính:
 
-Bảng này **bám theo đúng cấu trúc mục của trang quy định gốc** (Zalo đánh số I, II.1,
-II.2, II.3, IV), **không tự chế mã**. Cột "Check tool" là tên hằng số trong code của tool.
-Nhãn tự động hoá: 🟢 **Auto** (máy kiểm bằng logic thuần) · 🟡 **Semi** (máy cảnh báo,
-người xác nhận) · 🔴 **Human** (cần người/giấy tờ).
+- Quy định chung khi kiểm duyệt mẫu tin nhắn ZBS: https://zalo.solutions/news/quy-dinh-chung-khi-kiem-duyet-mau-tin-nhan-zbs/xdygqtrjjm97k28rsh07wr72
+- Thiết lập mục đích gửi khi tạo mẫu tin nhắn ZBS: https://zalo.solutions/blog/thiet-lap-muc-dich-gui-khi-tao-mau-zns/jnb3n2isrtlb21vts4dpiyzb
+- Quy định module hình ảnh: https://zalo.solutions/news/huong-dan-cac-quy-dinh-xet-duyet-template-zns-chua-module-hinh-anh/pkk6ds8irzpv7mok9hebggji
+- Chính sách cộng đồng Zalo: https://help.zalo.me/huong-dan/chuyen-muc/chinh-sach-cong-dong-zalo/
 
----
-
-## I. Phân loại mục đích (Tag) — mỗi mẫu gắn đúng 1 trong 3
-
-| Tag | Nghĩa | Auto? |
-|-----|-------|-------|
-| Tag 1 | Giao dịch (nội dung gắn với 1 giao dịch cụ thể) | 🟡 người chọn Loại template |
-| Tag 2 | Chăm sóc KH (cập nhật, chính sách, khảo sát, quyền lợi) | 🟡 |
-| Tag 3 | Hậu mãi (quảng bá, upsell, khuyến mãi) | 🟡 |
-
-> Lẫn mục đích thì Zalo ưu tiên loại "nặng" hơn (dính hậu mãi → Tag 3…). Việc phán Tag
-> cần ngữ cảnh → tool **để người chọn Loại template** rồi suy ra Tag.
-
-## II.1. Yêu cầu tổng quan (áp cho mọi Tag)
-
-| Nội dung quy định | Auto? | Check tool |
-|-------------------|-------|-----------|
-| Nút thao tác: link phải ở CTA, **không** để URL trong nội dung | 🟢 | `URL_IN_BODY` |
-| Nút thao tác: SĐT/hotline phải ở CTA, không để trong nội dung | 🟢 | `PHONE_IN_BODY` |
-| Nút thao tác: không dùng link rút gọn (bit.ly, tinyurl…) | 🟢 | `SHORTENED_LINK` |
-| Nút thao tác: không dẫn tới nhóm/nhóm chat MXH (Zalo group, FB, Telegram, Messenger) | 🟢 | `GROUP_CHAT_LINK` |
-| Văn phong: không emoji / ký tự trang trí | 🟢 | `EMOJI_SPECIAL` |
-| Văn phong: tiếng Việt có dấu, một ngôn ngữ, đúng chính tả | 🟡 | `SUSPICIOUS_TYPO` (bản hẹp) |
-| Tham số: bọc `< >`, không dấu cách/dấu tiếng Việt, nối bằng `_` | 🟢 | `PARAM_FORMAT` |
-| Tham số: mỗi biến cần nhãn mô tả phía trước | 🟡 | `PARAM_NO_PREFIX` |
-| Logo: có logo OA và chứng minh được quyền dùng | 🔴 | (checklist) |
-| Đối tượng nhận tin: chỉ gửi KH đã phát sinh giao dịch | 🔴 | (checklist) |
-| Thiết lập thanh toán: STK phải của chính DN sở hữu OA. VD reject: 588636 | 🔴 | (checklist) |
-
-## II.2. Yêu cầu theo mục đích (khác nhau theo Tag)
-
-| Nội dung quy định | Auto? | Check tool |
-|-------------------|-------|-----------|
-| Tag 1: bắt buộc TÊN KH **kết hợp** ≥1 tham số định danh (mã đơn/mã KH/mã HĐ). VD reject: 589269, 588835, 587432 | 🟢 | `MISSING_IDENTIFIER` |
-| Dùng từ chính xác (vd "đơn hàng" → "mã đơn hàng") | 🟡 | `WORDING` |
-| OTP dùng mẫu mặc định, không CTA | 🟢 | (xử lý bằng ngoại lệ: OTP miễn định danh) |
-| Tag 3: thể hiện rõ thể lệ chương trình/khuyến mãi công khai | 🔴 | (checklist) |
-
-## II.3. Bổ sung với dịp đặc biệt
-
-| Nội dung quy định | Auto? | Check tool |
-|-------------------|-------|-----------|
-| Chúc mừng sinh nhật / Lễ Tết: bắt buộc kèm hình ảnh + voucher/quà hợp lệ | 🔴 | (checklist) |
-
-## IV. Nhóm ngành / sản phẩm đặc biệt
-
-| Nội dung quy định | Auto? | Check tool |
-|-------------------|-------|-----------|
-| Ngành hạn chế (mỹ phẩm/thẩm mỹ, sản phẩm sinh lý, rượu bia, TPCN, thuốc, phong thủy, tang lễ…) cần giấy phép; có danh sách sản phẩm không hỗ trợ | 🔴 | (checklist) |
-
-> **Lưu ý về đánh số:** số mục (I, II.1, II.2, II.3, IV) lấy đúng theo trang quy định
-> gốc của Zalo. Trang có thể còn mục khác (vd phần III) không liên quan trực tiếp tới
-> nội dung mẫu tin nên không đưa vào đây.
+Ghi chú quan trọng: mã `G/P/S/H/T` bên dưới là mã tự map cho bài làm, không phải mã chính thức của Zalo. Cột `Nguồn` cho biết rule này bám vào mục nào của tài liệu gốc.
 
 ---
 
-## Step 2 — Chọn rule để tự động hoá (prioritization)
+## Step 1 - Map các nhóm rule lớn
 
-Bản map có ~21 rule. **Không code hết** — chọn lọc theo 2 tiêu chí và nói rõ lý do bỏ:
+Đề yêu cầu "map the rules" để chứng minh đã hiểu phạm vi kiểm duyệt, nhưng Step 2 cũng yêu cầu prioritization nên tool không cần tự động hóa toàn bộ. Bảng này map các nhóm rule lớn, sau đó chọn subset đáng tự động hóa nhất.
 
-- **(a) máy kiểm được rạch ròi từ JSON** (không cần giấy tờ/ngữ cảnh)
-- **(b) impact cao** = tần suất reject thật trong 10 mẫu + giá trị chặn phủ đầu
+### T. Phân loại mục đích gửi
 
-### 2a. 10 check được chọn — xếp theo ưu tiên (impact giảm dần)
+| Code | Nguồn | Rule group | Auto? | Ghi chú |
+|---|---|---|---|---|
+| T1 | Zalo I + bài purpose guide | Chọn đúng Tag 1/2/3 theo mục đích gửi | Semi | JSON không luôn có Tag, nên demo dùng dropdown/default; thực tế cần người chọn đúng mục đích. |
 
-Thứ tự này chính là thứ tự tool hiển thị trong "Bảng rule" (đọc từ `CHECK_CATALOG`).
+Tag theo nguồn:
 
-| # | Check tool | Mục Zalo | Vì sao ưu tiên | Mẫu thật |
-|---|-----------|----------|----------------|----------|
-| 1 | `MISSING_IDENTIFIER` | II.2 | Nguyên nhân reject #1 với Tag 1 | 589269, 588835, 587432 |
-| 2 | `URL_IN_BODY` | II.1 | Cực hay dính, regex chính xác | 589221 |
-| 3 | `PHONE_IN_BODY` | II.1 | Reject phổ biến cùng nhóm link | 589221 |
-| 4 | `GROUP_CHAT_LINK` | II.1 | Rõ ràng, blacklist domain | 588255 |
-| 5 | `SUSPICIOUS_TYPO` | II.1 | Reject thật (KÍCH HỌA), từ điển hẹp | 589220 |
-| 6 | `WORDING` | II.2 | "đơn hàng <mã>" thiếu tiền tố "mã" | 589269 |
-| 7 | `SHORTENED_LINK` | II.1 | Blacklist đơn giản, giá trị cao | — |
-| 8 | `EMOJI_SPECIAL` | II.1 | Unicode range, chặn phủ đầu | — |
-| 9 | `PARAM_FORMAT` | II.1 | Regex sạch, phòng ngừa | — |
-| 10 | `PARAM_NO_PREFIX` | II.1 | Semi, cần người xác nhận | — |
+- Tag 1 - Giao dịch: liên quan giao dịch cụ thể, xác thực, xác nhận, trạng thái giao dịch, thanh toán.
+- Tag 2 - Chăm sóc khách hàng: cập nhật tài khoản/chính sách, khảo sát/đánh giá dịch vụ, loyalty/quyền lợi khách hàng.
+- Tag 3 - Hậu mãi: quảng bá, upsell/cross-sell, mời tải app/kênh, tái tục/gia hạn, khuyến mãi hậu mãi.
 
-1–6 có bằng chứng reject thật → ưu tiên cao nhất. 7–10 là chặn phủ đầu (chưa dính trong 10 mẫu nhưng rẻ, giá trị rõ) → làm sau.
+### G. Yêu cầu tổng quan
 
-### 2b. Rule CỐ TÌNH không tự động (dù máy làm được) — điểm prioritization
+| Code | Nguồn | Rule group | Auto? | Check tool |
+|---|---|---|---|---|
+| G1 | Zalo II.1 | Link không nằm trong body, phải đặt ở CTA | Auto | `URL_IN_BODY` |
+| G2 | Zalo II.1 | SĐT/hotline không nằm trong body, phải đặt ở CTA | Auto | `PHONE_IN_BODY` |
+| G3 | Zalo II.1 | Không dùng link rút gọn | Auto | `SHORTENED_LINK` |
+| G4 | Zalo II.1 | Không dẫn đến group/group chat, chat Messenger, Zalo cá nhân | Auto | `GROUP_CHAT_LINK` |
+| G5 | Zalo II.1 | Không icon, emoji, ký tự trang trí | Auto | `EMOJI_SPECIAL` |
+| G6 | Zalo II.1 | Tiếng Việt có dấu, một ngôn ngữ, đúng chính tả | Semi/Human | Không full spellcheck vì dễ false positive. |
+| G7 | Zalo II.1 | Không typo rõ ràng trong nội dung | Semi | `SUSPICIOUS_TYPO` |
+| G8 | Zalo II.1 | Tham số đúng format `<...>`, không dấu cách/dấu tiếng Việt, nối bằng `_` | Auto | `PARAM_FORMAT` |
+| G9 | Zalo II.1 | Tham số cần nhãn/tiền tố mô tả phía trước | Semi | `PARAM_NO_PREFIX` |
+| G10 | Zalo II.1 | Logo đúng chuẩn, không chứa link/SĐT, có quyền sử dụng | Human | Checklist giấy tờ/ngữ cảnh. |
+| G11 | Zalo II.1 + chính sách cộng đồng | Nội dung không vi phạm chính sách nền tảng, không lừa đảo/spam/giả mạo | Human | Checklist/người kiểm, không tự phán bằng regex. |
+| G12 | Zalo II.1 | Nhắc đến thương hiệu bên khác cần chứng minh hợp tác/quyền sử dụng | Human | Checklist giấy tờ. |
 
-Đây mới là phần thể hiện lựa chọn, không chỉ "auto hết những gì làm được":
+### P. Yêu cầu theo mục đích
 
-| Mục Zalo | Nội dung | Vì sao KHÔNG auto |
-|----------|----------|-------------------|
-| II.1 (văn phong) | Chính tả / 1 ngôn ngữ | Spellcheck toàn phần rất nhiễu (false positive cao) → chỉ giữ **từ điển typo hẹp** đổi lấy độ chính xác. |
-| I (phân loại Tag) | Phân loại Tag | Cần phán đoán mục đích → để **người chọn Loại template**, tránh máy đoán sai rồi kéo theo II.2 sai. |
-| II.2 (OTP) | OTP mẫu mặc định | OTP dùng mẫu cố định → xử lý bằng **ngoại lệ** (miễn định danh), không cần check riêng. |
+| Code | Nguồn | Rule group | Auto? | Check tool |
+|---|---|---|---|---|
+| P1 | Zalo II.2 | Tag 1/2 cần tên khách hàng + ít nhất 1 tham số định danh/xác định giao dịch; Tag 3 cần tên khách hàng và định danh theo mục đích | Auto/Semi | `MISSING_IDENTIFIER` |
+| P2 | Zalo II.1/II.2 | Chỉ gửi cho user đã phát sinh giao dịch, trừ OTP tài khoản mới | Human | Checklist vì cần dữ liệu ngoài JSON. |
+| P3 | Zalo II.2 | OTP dùng mẫu mặc định, không CTA; miễn một số rule định danh | Auto bằng ngoại lệ | `otpExempt` |
+| P4 | Zalo II.2 | Wording phải chính xác, ví dụ "đơn hàng" khi nói mã thì nên là "mã đơn hàng" | Semi | `WORDING` |
+| P5 | Zalo II.2 | Tag 3/khuyến mãi cần thể hiện thể lệ, điều kiện, HSD/chương trình công khai | Human | Checklist vì cần ngữ cảnh/công khai ngoài JSON. |
+| P6 | Zalo II.2 | Payment tới STK ngân hàng phải dùng đúng mẫu yêu cầu thanh toán; kênh thanh toán độc lập cần CTA tương ứng | Human/Semi | Checklist, có thể phát hiện dấu hiệu payment. |
 
-### 2c. Ranh giới máy/người
+### S. Dịp đặc biệt và ngành đặc biệt
 
-Các mục cần **giấy tờ/ngữ cảnh** (thanh toán đúng chủ, đối tượng nhận tin, quyền logo ở
-II.1; thể lệ Tag 3 ở II.2; dịp lễ ở II.3; ngành hạn chế ở IV) → tool **không tự phán**,
-chỉ in ra checklist kèm *"cần đội kiểm duyệt xác minh"* để tránh false confidence.
+| Code | Nguồn | Rule group | Auto? | Check tool |
+|---|---|---|---|---|
+| S1 | Zalo II.3 | Sinh nhật/Lễ Tết/voucher cần quà/voucher hợp lệ, điều kiện áp dụng rõ ràng | Human | Checklist |
+| S2 | Zalo II.1/II.2 | STK/chủ tài khoản thanh toán phải thuộc DN sở hữu OA hoặc có ủy quyền thu hộ | Human | Checklist |
+| S3 | Zalo IV + chính sách cộng đồng | Ngành/sản phẩm hạn chế cần giấy phép hoặc không được hỗ trợ | Human | Checklist |
 
-> Đính chính sau khi đối chiếu sheet: **587432** (Voucher) reject vì **thiếu tham số định danh** (giống 588835) → `MISSING_IDENTIFIER` (II.2). **588636** (Payment) reject vì **STK không đúng chủ OA** → checklist 🔴 (thiết lập thanh toán, II.1) — máy không tự phán.
+### H. Module hình ảnh
+
+| Code | Nguồn | Rule group | Auto? | Check tool |
+|---|---|---|---|---|
+| H1 | Quy định module hình ảnh | Nếu có ảnh: tối đa 3 ảnh, 16:9, <= 500KB, JPG/PNG, có CTA chính, không dùng cùng logo, Rating/OTP không hỗ trợ ảnh | Human/Semi | Checklist |
+| H2 | Quy định module hình ảnh | Text trong ảnh rõ, không quá 50% diện tích; ảnh không QR/barcode/SĐT/giả nút/giả hệ điều hành | Human | Checklist |
+| H3 | Quy định module hình ảnh + chính sách Zalo | Ảnh không chứa nội dung vi phạm, thương hiệu bên khác cần bằng chứng, AI image cần làm rõ | Human | Checklist |
 
 ---
 
-## Step 3 — Input thật & cách tool đọc
+## Step 2 - Prioritization
 
-Input đề bài là **JSON ZBS thật**: `root.sections[]` lồng sâu (xem sheet "Sample json"), text nằm rải trong `banner.title.text`, `map_info.items[].key/value.title.text`, `paragraph`, `carousel`, `otp`…; CTA/link ở `buttons.items[].click.data`; tham số bọc `<...>` hoặc `<span class="param"><...></span>`.
+Tiêu chí chọn rule để code:
 
-- Tool có **adapter** nhận diện & chuẩn hoá 2 format: JSON ZBS thật + schema phẳng gọn (demo).
-- JSON không mang **Tag** → người dùng chọn **Loại template** (Payment/Voucher/Rating/OTP/Tuỳ chỉnh/Carousel) → map ra Tag 1/2/3. OTP được miễn check định danh (theo ngoại lệ của Zalo).
-- Không hỗ trợ format hiển thị của sheet (`string"…"`, `{7 items`) — đó chỉ là cách JSON-viewer render, tool báo lỗi và nhắc dán JSON chuẩn.
+1. Máy có thể kiểm được từ JSON/content mà không cần giấy tờ hay dữ liệu ngoài.
+2. Có impact cao trong sample reject thật của đề hoặc dễ gây reject phổ biến.
+3. Ít false positive hơn so với full moderation.
+
+### 10 check được chọn
+
+| Rank | Check tool | Code | Nguồn | Vì sao ưu tiên | Sample đối chiếu |
+|---|---|---|---|---|---|
+| 1 | `MISSING_IDENTIFIER` | P1 | Zalo II.2 | Reject nhiều nhất trong sheet, gồm custom và voucher | 589269, 588835, 587432 |
+| 2 | `URL_IN_BODY` | G1 | Zalo II.1 | Regex rõ, lỗi reject thật | 589221 |
+| 3 | `PHONE_IN_BODY` | G2 | Zalo II.1 | Regex rõ, cùng case reject với link | 589221 |
+| 4 | `GROUP_CHAT_LINK` | G4 | Zalo II.1 | Blacklist domain rõ | 588255 |
+| 5 | `SUSPICIOUS_TYPO` | G7 | Zalo II.1 | Có typo reject thật, chỉ dùng từ điển hẹp | 589220 |
+| 6 | `WORDING` | P4 | Zalo II.2 | Có wording reject thật | 588636 |
+| 7 | `SHORTENED_LINK` | G3 | Zalo II.1 | Máy bắt tốt, rủi ro cao | Preventive |
+| 8 | `EMOJI_SPECIAL` | G5 | Zalo II.1 | Máy bắt tốt, dễ reject do văn phong | Preventive |
+| 9 | `PARAM_FORMAT` | G8 | Zalo II.1 | Regex sạch, phòng lỗi khi submit | Preventive |
+| 10 | `PARAM_NO_PREFIX` | G9 | Zalo II.1 | Có sample liên quan nhưng cần người xác nhận | 587432 |
+
+### Không tự động hóa có chủ ý
+
+| Code | Nguồn | Không auto vì sao |
+|---|---|---|
+| T1 | Zalo I + purpose guide | Phân loại mục đích cần hiểu bối cảnh. Tool chỉ hỗ trợ chọn/default, không đoán toàn bộ. |
+| G6 | Zalo II.1 | Full spellcheck tiếng Việt dễ false positive; chỉ bắt typo nổi bật. |
+| G10/G12 | Zalo II.1 | Logo/thương hiệu bên khác cần giấy tờ hoặc nguồn ngoài. |
+| P2/S2/S3 | Zalo II.1/II.2/IV | Cần dữ liệu giao dịch, chủ STK, giấy phép ngành. |
+| H1/H2/H3 | Image rules | Cần đọc ảnh, OCR, kiểm layout/giấy tờ/ngữ cảnh. |
+
+---
+
+## Step 3 - Input và output
+
+Input tool hỗ trợ:
+
+- JSON ZBS chuẩn: object có `root.sections[]`.
+- Schema demo phẳng: `{ content, buttons, params, tag }`.
+- Pseudo JSON trong Excel (`string"..."`, `{7 items`, `booltrue`) được coi là invalid input để test error handling.
+
+Output:
+
+- `status`: pass / review / fail.
+- `errors`: vi phạm tự động bắt được.
+- `warnings`: vi phạm bán tự động, người dùng cần soát.
+- `checklist`: rule cần human review/giấy tờ/ngữ cảnh.

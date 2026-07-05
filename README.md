@@ -1,111 +1,112 @@
-# ZBS Rule Check — Template Validation Tool
+# ZBS Rule Check - Template Validation Tool
 
-Công cụ kiểm duyệt **mẫu tin nhắn ZBS** trước khi gửi duyệt: đọc JSON template, chạy
-tự động các rule quan trọng và in ra danh sách vi phạm kèm gợi ý sửa, đồng thời
-liệt kê những mục **cần người kiểm duyệt / giấy tờ** mà máy không tự phán.
+Working tool for **Challenge 2 - Build a Template Validation Tool** in the ZBS Product Intern Home Assignment.
 
-> Bài làm cho **Challenge 2 — Build a Template Validation Tool** (ZBS Product Intern
-> Home Assignment). Ruleset gốc:
-> [Quy định chung khi kiểm duyệt mẫu tin nhắn ZBS](https://zalo.solutions/news/quy-dinh-chung-khi-kiem-duyet-mau-tin-nhan-zbs/xdygqtrjjm97k28rsh07wr72).
+The tool helps a business pre-check a ZBS template before submitting it for moderation. It reads template JSON, runs a prioritized set of automated checks, returns violations with suggestions, and lists rules that still need human review.
 
-## Cách chạy
+## Sources
+
+The rule map is based on:
+
+- ZBS moderation rules: https://zalo.solutions/news/quy-dinh-chung-khi-kiem-duyet-mau-tin-nhan-zbs/xdygqtrjjm97k28rsh07wr72
+- Purpose/Tag setup guide: https://zalo.solutions/blog/thiet-lap-muc-dich-gui-khi-tao-mau-zns/jnb3n2isrtlb21vts4dpiyzb
+- Image feature announcement: https://zalo.solutions/news/ra-mat-tinh-nang-thiet-lap-hinh-anh-trong-mau-tin-zns/ekq3tifzt6g0n8hlfwwjzt1q
+- Image module rules: https://zalo.solutions/news/huong-dan-cac-quy-dinh-xet-duyet-template-zns-chua-module-hinh-anh/pkk6ds8irzpv7mok9hebggji
+- Zalo community policy: https://help.zalo.me/huong-dan/chuyen-muc/chinh-sach-cong-dong-zalo/
+
+## How To Run
 
 ```bash
 npm install
-npm run dev      # mở http://localhost:5173
-npm run build    # build production (tsc + vite)
+npm run dev
+npm run build
 ```
 
-Chọn 1 mẫu thử ở dropdown hoặc dán JSON template của bạn vào ô bên trái; kết quả
-kiểm duyệt cập nhật tức thì bên phải.
+Open the local Vite URL, choose a sample or paste JSON, then click **Kiểm tra thử ngay!**.
 
-## Cách tiếp cận
+## Deliverables
 
-### Step 1 — Map toàn bộ rule
+- Rule map: [`public/design/zbs_rule_map.md`](public/design/zbs_rule_map.md)
+- Explanation docs: [`docs1/`](docs1/)
+  - Read first: [`docs1/06-ban-de-doc-de-hieu.md`](docs1/06-ban-de-doc-de-hieu.md)
+  - Interview/talking script: [`docs1/07-script-noi-voi-giam-khao.md`](docs1/07-script-noi-voi-giam-khao.md)
+  - Detailed README explanation: [`docs1/08-giai-thich-readme-that-chi-tiet.md`](docs1/08-giai-thich-readme-that-chi-tiet.md)
+- Tool code:
+  - `src/lib/adapter.ts` - normalizes JSON input
+  - `src/lib/rules.ts` - prioritized checks + human review checklist
+  - `src/lib/samples.ts` - example inputs
 
-Ruleset được phân thành **4 tầng** (phân loại Tag → yêu cầu tổng quan → yêu cầu theo
-mục đích → quy định đặc biệt). Mỗi rule gắn nhãn khả năng tự động hoá:
-**Auto** (máy kiểm bằng logic thuần) · **Semi** (máy cảnh báo, người xác nhận) ·
-**Human** (phải người/giấy tờ quyết định).
+## Approach
 
-Bảng rule đầy đủ: [`public/design/zbs_rule_map.md`](public/design/zbs_rule_map.md).
+### Step 1 - Map The Rules
 
-### Step 2 — 10 check được tự động hoá
+I mapped the official ZBS rules into internal rule groups:
 
-Tiêu chí chọn: **(a)** máy kiểm được từ JSON + **(b)** tần suất reject cao trong 10
-mẫu thật của đề. Nhóm Human được *liệt kê để nhắc người kiểm duyệt* chứ không tự phán —
-tránh false confidence.
+- `T` - Tag / purpose selection
+- `G` - General moderation rules
+- `P` - Purpose-specific rules
+- `S` - Special cases such as payment, holidays, restricted industries
+- `H` - Image module rules
 
-| Check | Rule | Mức | Ý nghĩa |
-|-------|------|-----|---------|
-| `PHONE_IN_BODY` | G2 | Auto | SĐT/hotline phải ở CTA, không để trong nội dung |
-| `URL_IN_BODY` | G1 | Auto | Link phải ở CTA, không để trong nội dung |
-| `GROUP_CHAT_LINK` | G4 | Auto | Cấm link nhóm/chat (zalo.me/g/, FB group, t.me, m.me…) |
-| `SHORTENED_LINK` | G3 | Auto | Cấm link rút gọn (bit.ly, tinyurl, onelink…) |
-| `MISSING_IDENTIFIER` | P1 | Auto | Tag 1 cần TÊN KH **+** ≥1 mã giao dịch |
-| `PARAM_FORMAT` | G8 | Auto | Biến bọc `< >`, không dấu cách/dấu, nối bằng `_` |
-| `EMOJI_SPECIAL` | G5 | Auto | Không emoji / ký tự trang trí |
-| `PARAM_NO_PREFIX` | G9 | Semi | Biến đứng trơ, thiếu nhãn mô tả phía trước |
-| `SUSPICIOUS_TYPO` | G7 | Semi | Nghi lỗi đánh máy (vd "KÍCH HỌA") |
-| `WORDING` | P4 | Semi | "đơn hàng &lt;mã&gt;" thiếu tiền tố "mã" |
+These codes are **my internal rule map**, not official Zalo rule IDs. Each code is tied back to the official source section, such as `Zalo II.1`, `Zalo II.2`, `Zalo IV`, or the image-module rules.
 
-**Checklist Human review:** thanh toán đúng chủ (S2), giấy phép ngành (S3),
-voucher lễ Tết (S1), quyền logo (G10), phát sinh giao dịch (P2), chương trình công
-khai (S5). Tool tự bật cờ *"có dấu hiệu"* khi bắt gặp ngữ cảnh liên quan.
+### Step 2 - Prioritize Checks
 
-## Input — 2 format được hỗ trợ
+The assignment explicitly allows prioritization: from the rule map, I selected the rules I judged most important to validate automatically. I prioritized checks that:
 
-Tool tự nhận diện định dạng đầu vào:
+1. Can be validated reliably from JSON/content.
+2. Have high impact in the provided sample rejects.
+3. Avoid high false-positive human judgments.
 
-1. **JSON ZBS thật** — cấu trúc `root.sections[]` lồng sâu như sheet đề bài. Adapter
-   duyệt cây, trích nội dung từ `banner.title.text`, `map_info.items[]`, `paragraph`,
-   `carousel`, `otp`…; tách link CTA từ `buttons.items[].click.data`; nhận biến `<...>`
-   kể cả khi bọc `<span class="param">`.
-2. **Schema phẳng** — `{ content, buttons, params }` gọn cho demo nhanh.
+Automated/semi-automated checks:
 
-JSON không mang trường **Tag** → người dùng chọn **Loại template** (Payment / Voucher /
-Rating / OTP / Tuỳ chỉnh / Carousel) → map ra Tag 1/2/3. OTP được miễn check định danh
-(ngoại lệ P2/P3).
+| Check | Code | Source | Level | What it catches |
+|---|---|---|---|---|
+| `MISSING_IDENTIFIER` | `P1` | Zalo II.2 | Auto | Missing customer name / transaction identifier |
+| `URL_IN_BODY` | `G1` | Zalo II.1 | Auto | URL in body instead of CTA |
+| `PHONE_IN_BODY` | `G2` | Zalo II.1 | Auto | Phone/hotline in body instead of CTA |
+| `GROUP_CHAT_LINK` | `G4` | Zalo II.1 | Auto | Group/chat/social links |
+| `SUSPICIOUS_TYPO` | `G7` | Zalo II.1 | Semi | Known typo patterns, e.g. "KICH HOA" |
+| `WORDING` | `P4` | Zalo II.2 | Semi | Ambiguous wording like "don hang" when it should be "ma don hang" |
+| `SHORTENED_LINK` | `G3` | Zalo II.1 | Auto | Shortened URLs |
+| `EMOJI_SPECIAL` | `G5` | Zalo II.1 | Auto | Emoji / decorative characters |
+| `PARAM_FORMAT` | `G8` | Zalo II.1 | Auto | Invalid `<param>` format |
+| `PARAM_NO_PREFIX` | `G9` | Zalo II.1 | Semi | Parameter standing alone without a label |
 
-> Lưu ý: format hiển thị trong cell của sheet (`string"…"`, `{7 items`) là cách
-> JSON-viewer render, **không phải JSON hợp lệ** — tool báo lỗi và nhắc dán JSON chuẩn.
+Human-review checklist:
 
-## Ví dụ input/output
+- Recipient has a prior transaction (`P2`)
+- Payment account belongs to the OA business or has authorization (`S2`)
+- Logo/brand ownership (`G10/G12`)
+- Restricted industries/products and community-policy risk (`S3/G11`)
+- Promotion/public campaign context (`P5`)
+- Voucher/holiday/birthday special cases (`S1`)
+- Image module requirements (`H1/H2/H3`)
 
-10 mẫu dựng sẵn (dropdown) bám theo các template thật trong sheet:
+## Input Notes
 
-| Mẫu | Kết quả tool | Đối chiếu reject thật |
-|-----|--------------|-----------------------|
-| #589221 | Từ chối — `URL_IN_BODY` + `PHONE_IN_BODY` | Link & SĐT phải ở CTA |
-| #588255 | Từ chối — `GROUP_CHAT_LINK` | Link điều hướng tới nhóm |
-| #589269 | Từ chối — `MISSING_IDENTIFIER` | Thiếu tham số định danh |
-| #589220 | Cần soát — `SUSPICIOUS_TYPO` | Lỗi đánh máy "KÍCH HỌA" |
-| #588636 | Đạt (auto) + cờ Human **S2** | STK phải đúng chủ OA → cần người xác minh |
+The tool supports:
 
-Mẫu #588636 minh hoạ ranh giới máy/người: máy không "bịa" ra phán quyết mà đẩy S2 vào
-checklist cần con người kiểm tra.
+1. **Valid ZBS JSON** with `root.sections[]`.
+2. **Flat demo schema** like `{ content, buttons, params, tag }`.
 
-## Công nghệ & cấu trúc
+The attached Excel sample contains pseudo/invalid JSON display strings such as `string"..."`, `{7 items`, and `booltrue`. The tool intentionally detects that format and reports a friendly invalid-input message. This is used to test error handling, not treated as valid JSON.
 
-React 19 + TypeScript + Vite, Tailwind CSS v4. Giao diện theo design system
-**Roomio Soft Neobrutalism**.
+Important: a `pass` result means the tool did not find violations in the prioritized automated checks. It does **not** guarantee Zalo approval because several official rules require human review, documents, image inspection, transaction context, or business ownership verification.
 
-```
-src/
-  lib/
-    types.ts     # kiểu dữ liệu (ZbsTemplate, Finding, TemplateType…)
-    rules.ts     # 10 check tự động + checklist Human + bộ chạy moderate()
-    adapter.ts   # nhận diện & chuẩn hoá input (JSON ZBS thật / schema phẳng)
-    samples.ts   # 10 mẫu ví dụ
-  components/
-    RulesModal.tsx
-  App.tsx        # UI 2 cửa sổ: input JSON | kết quả kiểm duyệt
-public/design/   # rule map + design system prompt
-```
+## Example Coverage
 
-## Ghi chú dùng AI
+The built-in samples mirror the important rejection patterns from the assignment sheet:
 
-Toàn bộ tool được xây với sự hỗ trợ của AI coding assistant: đọc ruleset & sheet mẫu
-để dựng rule map, chuyển rule thành logic kiểm (regex + duyệt cây JSON), và dựng UI
-theo design system có sẵn. Phần quyết định *chọn rule nào tự động hoá* và *ranh giới
-máy/người* là product thinking được cân nhắc dựa trên dữ liệu reject thật.
+| Template ID | Expected tool result |
+|---|---|
+| `589221` | `URL_IN_BODY` + `PHONE_IN_BODY` |
+| `588255` | `GROUP_CHAT_LINK` |
+| `589269` | `MISSING_IDENTIFIER` |
+| `589220` | `SUSPICIOUS_TYPO` |
+| `588636` | Payment ownership checklist + wording risk |
+| `587432` | Identifier/prefix issue, documented in `docs1/04-sample-review.md` |
+
+## AI Usage
+
+AI was used to help read the official rules, structure the rule map, prioritize checks, implement the TypeScript validation logic, and draft the explanation docs. The tool intentionally does not claim full Zalo moderation coverage because several rules require human judgment, external business evidence, image review, or transaction context.

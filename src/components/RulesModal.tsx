@@ -31,8 +31,8 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
         <div className="overflow-y-auto px-6 pb-6">
           <p className="mb-2 text-xs font-semibold text-zinc-500">
             10 mục máy tự kiểm, xếp theo mức quan trọng (cái hay bị từ chối
-            nhất để trên đầu). Mã (I, II.1, II.2, II.3, IV) là số mục trong quy
-            định gốc của Zalo.
+            nhất để trên đầu). Mã G/P là mã mình tự map; phần sau là mục gốc
+            của Zalo để đối chiếu.
           </p>
           {CHECK_CATALOG.map((c, i) => (
             <div
@@ -50,7 +50,7 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
                   {c.why}
                 </div>
                 <div className="font-mono text-[10px] text-zinc-400">
-                  {c.rule} · {c.check}
+                  {c.rule} · {c.source} · {c.check}
                 </div>
               </div>
               <span className="shrink-0 text-xs font-black text-blue-600">
@@ -71,7 +71,7 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
               <div className="text-sm font-black text-black">
                 {e.label}{' '}
                 <span className="font-mono text-[10px] text-zinc-400">
-                  {e.rule}
+                  {e.rule} · {e.source}
                 </span>
               </div>
               <p className="text-[11px] font-semibold text-zinc-500">

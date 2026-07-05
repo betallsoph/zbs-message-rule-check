@@ -36,15 +36,17 @@ const BODY_TEXT_KEYS = new Set([
   'title',
 ])
 
-// Map loại template (dropdown) → Tag theo rule map.
+// Map loại template (dropdown) → Tag mặc định theo rule map.
 //  Giao dịch = Tag 1 · Chăm sóc KH = Tag 2 · Hậu mãi = Tag 3
+// Lưu ý: đây là default để demo khi JSON không có Tag. Trong thực tế, "mục đích
+// gửi" nên được người dùng chọn/ghi rõ vì cùng một format có thể thuộc nhiều Tag.
 const TAG_OF_TYPE: Record<TemplateType, string> = {
   payment: 'Tag 1',
   otp: 'Tag 1',
   custom: 'Tag 1',
   voucher: 'Tag 2',
   carousel: 'Tag 2',
-  rating: 'Tag 3',
+  rating: 'Tag 2',
 }
 
 export const TEMPLATE_TYPES: { value: TemplateType; label: string }[] = [
@@ -78,6 +80,7 @@ interface Extracted {
   bodyTexts: string[]
   ctaUrls: string[]
   hasLogo: boolean
+  hasImage: boolean
 }
 
 // map_info: ghép nhãn (key) + giá trị (value) trên CÙNG một dòng để giữ
@@ -96,7 +99,12 @@ function collectMapInfo(mapInfo: JsonValue | undefined, acc: Extracted): void {
 
 // Duyệt cây root.sections[], gom text nội dung + URL trong CTA + cờ logo.
 function extract(root: JsonValue): Extracted {
-  const acc: Extracted = { bodyTexts: [], ctaUrls: [], hasLogo: false }
+  const acc: Extracted = {
+    bodyTexts: [],
+    ctaUrls: [],
+    hasLogo: false,
+    hasImage: false,
+  }
 
   const pushUrls = (s: string): void => {
     const matches = s.match(URL_RE)
@@ -110,9 +118,13 @@ function extract(root: JsonValue): Extracted {
     }
     if (!isJsonObject(node)) return
 
-    // Có logo / OA info / ảnh → phục vụ checklist G10.
-    if ('logo' in node || 'oa_info' in node || isJsonObject(node.img))
+    // Có logo / OA info → phục vụ checklist G10.
+    if ('logo' in node || 'oa_info' in node)
       acc.hasLogo = true
+
+    // Module hình ảnh / ảnh header → phục vụ checklist H1.
+    if ('map_image' in node || 'image' in node)
+      acc.hasImage = true
 
     for (const key of Object.keys(node)) {
       const value = node[key]
@@ -159,7 +171,7 @@ function deepText(node: JsonValue, path: string[]): string {
 export function normalizeZbs(parsed: JsonObject, type: TemplateType): ZbsTemplate {
   // root có thể thiếu / null / sai kiểu → fallback duyệt chính object gốc.
   const root = isJsonObject(parsed.root) ? parsed.root : parsed
-  const { bodyTexts, ctaUrls, hasLogo } = extract(root)
+  const { bodyTexts, ctaUrls, hasLogo, hasImage } = extract(root)
 
   return {
     id: asString(root.extend_info) || undefined,
@@ -168,6 +180,7 @@ export function normalizeZbs(parsed: JsonObject, type: TemplateType): ZbsTemplat
     content: stripHtml(bodyTexts.join('\n')),
     buttons: ctaUrls.map((url) => ({ url })),
     hasLogo,
+    hasImage,
     otpExempt: type === 'otp',
   }
 }
@@ -207,6 +220,10 @@ export function normalizeFlat(parsed: JsonObject, type: TemplateType): ZbsTempla
       typeof parsed.hasLogo === 'boolean'
         ? parsed.hasLogo
         : /logo/i.test(content),
+    hasImage:
+      typeof parsed.hasImage === 'boolean'
+        ? parsed.hasImage
+        : /image|hình ảnh|ảnh/i.test(content),
     otpExempt: type === 'otp',
   }
 }

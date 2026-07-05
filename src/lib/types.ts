@@ -24,6 +24,7 @@ export interface ZbsTemplate {
   buttons?: ZbsButton[] // các nút CTA (kèm URL)
   params?: string[] // danh sách biến, vd ["<customer_name>", "<order_orderCode>"]
   hasLogo?: boolean // có section logo / oa_info / banner ảnh
+  hasImage?: boolean // có module hình ảnh / ảnh header
   otpExempt?: boolean // OTP → miễn check định danh (ngoại lệ P2/P1)
 }
 
@@ -37,7 +38,8 @@ export type Autonomy = 'auto' | 'semi' | 'human'
 
 export interface Finding {
   check: string // mã check, vd "PHONE_IN_BODY"
-  rule: string // rule gốc, vd "G2"
+  rule: string // mã nội bộ trong rule map, vd "G2"
+  source: string // mục gốc, vd "Zalo II.1"
   tier: number // tầng 1-4
   label: string // tên hiển thị
   message: string // mô tả vi phạm
@@ -48,7 +50,8 @@ export interface Finding {
 }
 
 export interface ChecklistItem {
-  rule: string
+  rule: string // mã nội bộ trong rule map
+  source: string // mục gốc / nguồn tham chiếu
   label: string
   note: string
   triggered?: boolean // có dấu hiệu trong mẫu này → nhắc mạnh hơn

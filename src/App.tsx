@@ -373,7 +373,7 @@ function FindingRow({ f }: { f: Finding }) {
         <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />
         <span className="text-sm font-black text-black">{f.label}</span>
         <span className="ml-auto shrink-0 text-[10px] font-bold text-zinc-400">
-          {f.rule} · {f.check}
+          {f.rule} · {f.source} · {f.check}
         </span>
       </div>
       <p className="mt-1 text-xs font-semibold text-zinc-500">{f.message}</p>
@@ -420,7 +420,7 @@ function HumanChecklist({ items }: { items: ModerationResult['checklist'] }) {
             <span className="h-2 w-2 shrink-0 rounded-full bg-purple-500" />
             <span className="text-sm font-black text-black">{it.label}</span>
             <span className="ml-auto shrink-0 text-[10px] font-black text-purple-600">
-              {it.rule}
+              {it.rule} · {it.source}
             </span>
           </div>
           <p className="mt-1 text-[11px] font-bold text-purple-700">
@@ -432,7 +432,7 @@ function HumanChecklist({ items }: { items: ModerationResult['checklist'] }) {
       {rest.length > 0 && (
         <p className="mt-2 text-[11px] leading-relaxed font-semibold text-zinc-400">
           {flagged.length > 0 ? 'Nhớ tự kiểm thêm khi gửi: ' : 'Cần tự kiểm thêm khi gửi: '}
-          {rest.map((it) => `${it.label} (${it.rule})`).join(' · ')}
+          {rest.map((it) => `${it.label} (${it.rule} · ${it.source})`).join(' · ')}
         </p>
       )}
     </div>
