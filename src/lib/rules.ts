@@ -428,16 +428,36 @@ export function moderate(t: ZbsTemplate): ModerationResult {
   }
 }
 
-// Metadata 10 check để hiển thị bảng tham chiếu.
+// 10 check đã chọn tự động — XẾP THEO ƯU TIÊN (impact = tần suất reject thật
+// + giá trị chặn). Tool hiển thị đúng thứ tự này ở "Bảng rule".
 export const CHECK_CATALOG = [
-  { check: 'PHONE_IN_BODY', rule: 'G2', autonomy: 'auto', label: 'SĐT trong nội dung' },
-  { check: 'URL_IN_BODY', rule: 'G1', autonomy: 'auto', label: 'Link trong nội dung' },
-  { check: 'GROUP_CHAT_LINK', rule: 'G4', autonomy: 'auto', label: 'Link nhóm/chat MXH' },
-  { check: 'SHORTENED_LINK', rule: 'G3', autonomy: 'auto', label: 'Link rút gọn' },
-  { check: 'MISSING_IDENTIFIER', rule: 'P1', autonomy: 'auto', label: 'Thiếu định danh (Tag 1)' },
-  { check: 'PARAM_FORMAT', rule: 'G8', autonomy: 'auto', label: 'Sai định dạng tham số' },
-  { check: 'EMOJI_SPECIAL', rule: 'G5', autonomy: 'auto', label: 'Emoji / ký tự đặc biệt' },
-  { check: 'PARAM_NO_PREFIX', rule: 'G9', autonomy: 'semi', label: 'Biến thiếu nhãn phía trước' },
-  { check: 'SUSPICIOUS_TYPO', rule: 'G7', autonomy: 'semi', label: 'Nghi ngờ lỗi đánh máy' },
-  { check: 'WORDING', rule: 'P4', autonomy: 'semi', label: 'Wording chưa chính xác' },
+  { check: 'MISSING_IDENTIFIER', rule: 'P1', autonomy: 'auto', label: 'Thiếu định danh (Tag 1)', why: 'Nguyên nhân reject #1 với Tag 1' },
+  { check: 'URL_IN_BODY', rule: 'G1', autonomy: 'auto', label: 'Link trong nội dung', why: 'Cực hay dính, regex chính xác' },
+  { check: 'PHONE_IN_BODY', rule: 'G2', autonomy: 'auto', label: 'SĐT trong nội dung', why: 'Reject phổ biến cùng nhóm link' },
+  { check: 'GROUP_CHAT_LINK', rule: 'G4', autonomy: 'auto', label: 'Link nhóm/chat MXH', why: 'Rõ ràng, blacklist domain' },
+  { check: 'SUSPICIOUS_TYPO', rule: 'G7', autonomy: 'semi', label: 'Nghi ngờ lỗi đánh máy', why: 'Reject thật (KÍCH HỌA), từ điển hẹp' },
+  { check: 'WORDING', rule: 'P4', autonomy: 'semi', label: 'Wording chưa chính xác', why: '"đơn hàng <mã>" thiếu tiền tố "mã"' },
+  { check: 'SHORTENED_LINK', rule: 'G3', autonomy: 'auto', label: 'Link rút gọn', why: 'Blacklist đơn giản, giá trị cao' },
+  { check: 'EMOJI_SPECIAL', rule: 'G5', autonomy: 'auto', label: 'Emoji / ký tự đặc biệt', why: 'Unicode range, chặn phủ đầu' },
+  { check: 'PARAM_FORMAT', rule: 'G8', autonomy: 'auto', label: 'Sai định dạng tham số', why: 'Regex sạch, phòng ngừa' },
+  { check: 'PARAM_NO_PREFIX', rule: 'G9', autonomy: 'semi', label: 'Biến thiếu nhãn phía trước', why: 'Semi, cần người xác nhận' },
+] as const
+
+// Rule CỐ TÌNH không tự động dù MÁY LÀM ĐƯỢC — đây mới là điểm prioritization.
+export const EXCLUDED_CATALOG = [
+  {
+    rule: 'G6',
+    label: 'Chính tả / 1 ngôn ngữ',
+    reason: 'Spellcheck toàn phần rất nhiễu → chỉ giữ từ điển typo hẹp (G7).',
+  },
+  {
+    rule: 'T1/T2',
+    label: 'Phân loại Tag',
+    reason: 'Cần phán đoán mục đích → để người chọn Loại template, tránh máy đoán sai.',
+  },
+  {
+    rule: 'P3',
+    label: 'OTP mẫu mặc định',
+    reason: 'OTP dùng mẫu cố định → xử lý bằng ngoại lệ, không cần check riêng.',
+  },
 ] as const

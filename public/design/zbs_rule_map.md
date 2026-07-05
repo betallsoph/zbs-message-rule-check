@@ -50,26 +50,47 @@ Bộ quy định chia làm **4 tầng**. Mỗi rule được gắn nhãn khả n
 
 ---
 
-## Step 2 — 10 rule được chọn để code tự động (và lý do chọn)
+## Step 2 — Chọn rule để tự động hoá (prioritization)
 
-Tiêu chí: **(a) máy kiểm được từ JSON** + **(b) tần suất reject cao trong dữ liệu thật**. Bỏ qua nhóm 🔴 vì cần giấy tờ/ngữ cảnh — tool sẽ *liệt kê để nhắc human review* chứ không tự phán.
+Bản map có ~21 rule. **Không code hết** — chọn lọc theo 2 tiêu chí và nói rõ lý do bỏ:
 
-| Mã check | Rule gốc | Vì sao ưu tiên | Đối chiếu mẫu thật |
-|----------|----------|----------------|--------------------|
-| `PHONE_IN_BODY` | G2 | Reject phổ biến, regex bắt chính xác | 589221 ✅ |
-| `URL_IN_BODY` | G1 | Cùng nhóm, cực hay dính | 589221 ✅ |
-| `GROUP_CHAT_LINK` | G4 | Rõ ràng, blacklist domain | 588255 ✅ |
-| `SHORTENED_LINK` | G3 | Blacklist đơn giản, giá trị cao | — |
-| `MISSING_IDENTIFIER` | P1 | Nguyên nhân reject #1 với Tag 1 | 589269, 588835, 587432 ✅ |
-| `PARAM_NO_PREFIX` | G9 | Bắt được biến trần không nhãn (dòng chỉ có biến) | — |
-| `PARAM_FORMAT` | G8 | Regex sạch | — |
-| `EMOJI_SPECIAL` | G5 | Unicode range | — |
-| `SUSPICIOUS_TYPO` | G7 | Từ điển nhỏ, flag để người soát | 589220 ✅ |
-| `WORDING` | P4 | Bắt "đơn hàng <mã>" thiếu tiền tố "mã" | 589269 ✅ |
+- **(a) máy kiểm được rạch ròi từ JSON** (không cần giấy tờ/ngữ cảnh)
+- **(b) impact cao** = tần suất reject thật trong 10 mẫu + giá trị chặn phủ đầu
 
-> Đính chính sau khi đối chiếu sheet: **587432** (Voucher) bị reject vì **thiếu tham số định danh** (giống 588835) → thuộc `MISSING_IDENTIFIER`, không phải G9. **588636** (Payment) bị reject vì **STK không đúng chủ OA** → thuộc checklist 🔴 **S2** (máy không tự phán, chỉ nhắc human review).
+### 2a. 10 check được chọn — xếp theo ưu tiên (impact giảm dần)
 
-**Ranh giới máy/người** (điểm product thinking): tool tự quyết 10 check trên, đồng thời in ra checklist 🔴 (thanh toán đúng chủ S2, giấy phép ngành S3, voucher lễ tết S1, quyền logo G10, phát sinh giao dịch P2, chương trình công khai S5) kèm ghi chú *"cần đội kiểm duyệt / giấy tờ xác minh"* — tránh false confidence.
+Thứ tự này chính là thứ tự tool hiển thị trong "Bảng rule" (đọc từ `CHECK_CATALOG`).
+
+| # | Mã check | Rule | Vì sao ưu tiên | Mẫu thật |
+|---|----------|------|----------------|----------|
+| 1 | `MISSING_IDENTIFIER` | P1 | Nguyên nhân reject #1 với Tag 1 | 589269, 588835, 587432 |
+| 2 | `URL_IN_BODY` | G1 | Cực hay dính, regex chính xác | 589221 |
+| 3 | `PHONE_IN_BODY` | G2 | Reject phổ biến cùng nhóm link | 589221 |
+| 4 | `GROUP_CHAT_LINK` | G4 | Rõ ràng, blacklist domain | 588255 |
+| 5 | `SUSPICIOUS_TYPO` | G7 | Reject thật (KÍCH HỌA), từ điển hẹp | 589220 |
+| 6 | `WORDING` | P4 | "đơn hàng <mã>" thiếu tiền tố "mã" | 589269 |
+| 7 | `SHORTENED_LINK` | G3 | Blacklist đơn giản, giá trị cao | — |
+| 8 | `EMOJI_SPECIAL` | G5 | Unicode range, chặn phủ đầu | — |
+| 9 | `PARAM_FORMAT` | G8 | Regex sạch, phòng ngừa | — |
+| 10 | `PARAM_NO_PREFIX` | G9 | Semi, cần người xác nhận | — |
+
+1–6 có bằng chứng reject thật → ưu tiên cao nhất. 7–10 là chặn phủ đầu (chưa dính trong 10 mẫu nhưng rẻ, giá trị rõ) → làm sau.
+
+### 2b. Rule CỐ TÌNH không tự động (dù máy làm được) — điểm prioritization
+
+Đây mới là phần thể hiện lựa chọn, không chỉ "auto hết những gì làm được":
+
+| Rule | Nội dung | Vì sao KHÔNG auto |
+|------|----------|-------------------|
+| G6 | Chính tả / 1 ngôn ngữ | Spellcheck toàn phần rất nhiễu (false positive cao) → chỉ giữ **từ điển typo hẹp** (G7) đổi lấy độ chính xác. |
+| T1/T2 | Phân loại Tag | Cần phán đoán mục đích → để **người chọn Loại template**, tránh máy đoán sai rồi kéo theo P1 sai. |
+| P3 | OTP mẫu mặc định | OTP dùng mẫu cố định → xử lý bằng **ngoại lệ** (miễn P1), không cần check riêng. |
+
+### 2c. Ranh giới máy/người
+
+Nhóm 🔴 (S1 voucher lễ tết, S2 thanh toán đúng chủ, S3 giấy phép ngành, S5 chương trình công khai, P2 phát sinh giao dịch, G10 quyền logo) cần **giấy tờ/ngữ cảnh** → tool **không tự phán**, chỉ in ra checklist kèm *"cần đội kiểm duyệt xác minh"* để tránh false confidence.
+
+> Đính chính sau khi đối chiếu sheet: **587432** (Voucher) reject vì **thiếu tham số định danh** (giống 588835) → `MISSING_IDENTIFIER`. **588636** (Payment) reject vì **STK không đúng chủ OA** → checklist 🔴 **S2** (máy không tự phán).
 
 ---
 
