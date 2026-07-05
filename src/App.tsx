@@ -110,7 +110,7 @@ export default function App() {
       <div className="roomio-grid-bg fixed inset-0 -z-10 opacity-50" />
       <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-b from-white/80 via-white/60 to-white/80" />
 
-      <main className="mx-auto w-full max-w-5xl space-y-6 px-5 py-6 sm:px-6 sm:py-10">
+      <main className="w-full space-y-6 px-5 py-6 sm:px-8 sm:py-10">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
@@ -126,7 +126,7 @@ export default function App() {
           </button>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-8 lg:grid-cols-3">
           <InputPanel
             input={input}
             activeKey={activeKey}
@@ -140,6 +140,7 @@ export default function App() {
             onLoadSample={loadSample}
           />
           <ResultPanel state={state} isStale={isStale} />
+          <ChecklistPanel state={state} isStale={isStale} />
         </div>
       </main>
 
@@ -298,8 +299,26 @@ function ResultPanel({
       {result.warnings.length > 0 && (
         <FindingGroup title="Cảnh báo" findings={result.warnings} />
       )}
+    </section>
+  )
+}
 
-      <HumanChecklist items={result.checklist} />
+// Cột 3 — checklist cần người kiểm duyệt (tách riêng cho bố cục 3 cột).
+function ChecklistPanel({
+  state,
+  isStale,
+}: {
+  state: ParseState
+  isStale: boolean
+}) {
+  if (!state.ok) return null
+  return (
+    <section
+      className={`transition-opacity duration-150 ${
+        isStale ? 'opacity-60' : ''
+      }`}
+    >
+      <HumanChecklist items={state.result.checklist} />
     </section>
   )
 }
@@ -361,7 +380,7 @@ function HumanChecklist({ items }: { items: ModerationResult['checklist'] }) {
   const flagged = items.filter((i) => i.triggered)
   const rest = items.filter((i) => !i.triggered)
   return (
-    <div className="mt-2 border-t-2 border-black/15 pt-4">
+    <div>
       <p className="mb-1 text-sm font-black text-blue-600">
         Cần người kiểm duyệt
         <span className="font-bold text-zinc-400">
