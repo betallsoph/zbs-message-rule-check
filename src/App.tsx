@@ -204,7 +204,7 @@ function InputPanel({
       <div className="flex flex-wrap items-center gap-2">
         <RoomioSelect
           compact
-          className="min-w-52 flex-1"
+          className="min-w-52 flex-[2]"
           value={activeKey}
           placeholder="Chọn mẫu thử…"
           options={SAMPLES.map((s) => ({ value: s.key, label: s.title }))}
@@ -212,7 +212,7 @@ function InputPanel({
         />
         <RoomioSelect
           compact
-          className="min-w-40 flex-1"
+          className="min-w-32 flex-1"
           value={templateType}
           options={TEMPLATE_TYPES.map((t) => ({
             value: t.value,
