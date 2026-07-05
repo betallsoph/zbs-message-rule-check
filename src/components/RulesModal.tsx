@@ -13,7 +13,7 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="flex max-h-[85vh] w-full max-w-xl animate-[scale-up_0.2s_ease-out] flex-col overflow-hidden rounded-lg border-2 border-black bg-white"
+        className="flex max-h-[85vh] w-full max-w-[980px] animate-[scale-up_0.2s_ease-out] flex-col overflow-hidden rounded-lg border-2 border-black bg-white"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex shrink-0 items-center justify-between px-6 pt-5 pb-4">
@@ -60,11 +60,12 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
           ))}
 
           <p className="mt-5 text-sm font-black text-blue-600">
-            Mấy cái này mình cố tình để yên, không tự động nha
+            Mấy cái này mình để yên, không cho nó tự động
           </p>
           <p className="mb-1 text-[11px] font-semibold text-zinc-500">
-            Không phải máy làm không được đâu — mà làm ẩu thì dễ báo sai, làm
-            phiền bạn. Nên mình thà nhường cho người, lý do cụ thể ở từng dòng.
+            Không phải vì AI không làm tool được, mà làm ẩu thì dễ báo sai, và
+            nó có nhiều kiểu khác nhau. Nên mình để cho người check phần này sẽ
+            kỹ hơn, lý do cụ thể ở từng dòng.
           </p>
           {EXCLUDED_CATALOG.map((e) => (
             <div key={e.rule} className="border-b border-black/10 py-2.5">
