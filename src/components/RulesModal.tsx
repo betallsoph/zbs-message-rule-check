@@ -31,7 +31,8 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
         <div className="overflow-y-auto px-6 pb-6">
           <p className="mb-2 text-xs font-semibold text-zinc-500">
             10 check được chọn tự động, xếp theo ưu tiên (impact = tần suất
-            reject thật + giá trị chặn).
+            reject thật + giá trị chặn). Mã (I, II.1, II.2, II.3, IV) là số mục
+            trong quy định gốc của Zalo.
           </p>
           {CHECK_CATALOG.map((c, i) => (
             <div
@@ -75,8 +76,9 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
             </div>
           ))}
           <p className="mt-3 text-[11px] font-semibold text-zinc-400">
-            Nhóm Human (S1/S2/S3/S5/P2/G10) cần giấy tờ/ngữ cảnh → chỉ liệt kê
-            ở checklist để nhắc người kiểm duyệt, máy không tự phán.
+            Nhóm cần người kiểm duyệt (thanh toán đúng chủ, đối tượng nhận
+            tin, quyền logo, dịp lễ, ngành hạn chế…) cần giấy tờ/ngữ cảnh → chỉ
+            liệt kê ở checklist, máy không tự phán.
           </p>
         </div>
       </div>

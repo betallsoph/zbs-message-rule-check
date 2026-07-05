@@ -28,7 +28,7 @@ function paramTokens(content: string): string[] {
   return content.match(/<[^<>]*>/g) ?? []
 }
 
-// ── 1. PHONE_IN_BODY (G2) — SĐT trong nội dung ────────────────────
+// ── 1. PHONE_IN_BODY (Zalo II.1 · nút thao tác) — SĐT trong nội dung ──
 const ACCOUNT_CTX = /(tài\s*khoản|\bstk\b|\bsố\s*tk\b|account)/i
 function checkPhoneInBody(t: ZbsTemplate): Finding[] {
   // Hotline 1800/1900 hoặc số di động/cố định VN 9-11 chữ số (cho phép . - space).
@@ -39,7 +39,7 @@ function checkPhoneInBody(t: ZbsTemplate): Finding[] {
   while ((m = re.exec(t.content))) {
     const raw = m[0].trim()
     if (/[<>]/.test(raw)) continue // số nằm trong token tham số
-    // Bỏ qua số tài khoản (thuộc checklist S2 - human review), không phải SĐT.
+    // Bỏ qua số tài khoản (thuộc checklist "thanh toán đúng chủ"), không phải SĐT.
     if (ACCOUNT_CTX.test(t.content.slice(Math.max(0, m.index - 24), m.index)))
       continue
     hits.push(raw)
@@ -48,7 +48,7 @@ function checkPhoneInBody(t: ZbsTemplate): Finding[] {
   return [
     {
       check: 'PHONE_IN_BODY',
-      rule: 'G2',
+      rule: 'II.1',
       tier: 2,
       label: 'SĐT trong nội dung',
       message:
@@ -61,7 +61,7 @@ function checkPhoneInBody(t: ZbsTemplate): Finding[] {
   ]
 }
 
-// ── 2. URL_IN_BODY (G1) — Link trong nội dung ─────────────────────
+// ── 2. URL_IN_BODY (Zalo II.1 · nút thao tác) — Link trong nội dung ──
 function checkUrlInBody(t: ZbsTemplate): Finding[] {
   const re =
     /\b(?:https?:\/\/|www\.)\S+|\b[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.(?:com|vn|net|org|info|io|me|link|shop|store|xyz|top|site|online|app)(?:\/\S*)?/gi
@@ -72,7 +72,7 @@ function checkUrlInBody(t: ZbsTemplate): Finding[] {
   return [
     {
       check: 'URL_IN_BODY',
-      rule: 'G1',
+      rule: 'II.1',
       tier: 2,
       label: 'Link trong nội dung',
       message: 'URL phải đặt ở nút CTA, không được nằm trong phần nội dung.',
@@ -84,7 +84,7 @@ function checkUrlInBody(t: ZbsTemplate): Finding[] {
   ]
 }
 
-// ── 3. GROUP_CHAT_LINK (G4) — Link nhóm/chat MXH ──────────────────
+// ── 3. GROUP_CHAT_LINK (Zalo II.1 · nút thao tác) — Link nhóm/chat MXH ──
 // Chỉ bắt các link nhóm/chat RÕ RÀNG. Không bắt oa.zalo.me/<id> (link OA
 // hợp lệ) hay zalo.me/s/ (mini app) để tránh false positive.
 const GROUP_PATTERNS: { re: RegExp; what: string }[] = [
@@ -107,7 +107,7 @@ function checkGroupChatLink(t: ZbsTemplate): Finding[] {
   return [
     {
       check: 'GROUP_CHAT_LINK',
-      rule: 'G4',
+      rule: 'II.1',
       tier: 2,
       label: 'Link nhóm / chat MXH',
       message:
@@ -119,7 +119,7 @@ function checkGroupChatLink(t: ZbsTemplate): Finding[] {
   ]
 }
 
-// ── 4. SHORTENED_LINK (G3) — Link rút gọn ─────────────────────────
+// ── 4. SHORTENED_LINK (Zalo II.1 · nút thao tác) — Link rút gọn ──
 const SHORTENERS =
   /\b(?:bit\.ly|tinyurl\.com|onelink\.\w+|goo\.gl|t\.co|cutt\.ly|rebrand\.ly|shorturl\.at|is\.gd|ow\.ly|rb\.gy|s\.id|shorten\.asia|link\.gl|vshare\.\w+)\b/i
 function checkShortenedLink(t: ZbsTemplate): Finding[] {
@@ -128,7 +128,7 @@ function checkShortenedLink(t: ZbsTemplate): Finding[] {
   return [
     {
       check: 'SHORTENED_LINK',
-      rule: 'G3',
+      rule: 'II.1',
       tier: 2,
       label: 'Link rút gọn',
       message: 'Cấm dùng link rút gọn (bit.ly, tinyurl, onelink…) ở CTA.',
@@ -140,7 +140,7 @@ function checkShortenedLink(t: ZbsTemplate): Finding[] {
   ]
 }
 
-// ── 5. MISSING_IDENTIFIER (P1) — Tag 1 cần tên KH + mã giao dịch ───
+// ── 5. MISSING_IDENTIFIER (Zalo II.2 · theo mục đích) — Tag 1 cần tên KH + mã ──
 // Tên KH: <TenKH>, <customer_name>, <CustName>… (KHÔNG tính mã KH là tên).
 const NAME_KEY = /(ten|hoten|fullname|(?:customer|cust)_?name|khachhang|\bname\b)/i
 // Mã giao dịch: <MaKH>, <MaDon>, <order_orderCode>, <CustID>, <customer_code>…
@@ -151,7 +151,7 @@ function collectParams(t: ZbsTemplate): string[] {
 }
 function checkMissingIdentifier(t: ZbsTemplate): Finding[] {
   if (normalizeTag(t.tag) !== 1) return []
-  if (t.otpExempt) return [] // OTP dùng mẫu mặc định — ngoại lệ định danh (P2/P3)
+  if (t.otpExempt) return [] // OTP dùng mẫu mặc định — miễn định danh (ngoại lệ Zalo)
   const params = collectParams(t)
   const hasName = params.some((p) => NAME_KEY.test(p))
   const hasCode = params.some((p) => CODE_KEY.test(p))
@@ -162,7 +162,7 @@ function checkMissingIdentifier(t: ZbsTemplate): Finding[] {
   return [
     {
       check: 'MISSING_IDENTIFIER',
-      rule: 'P1',
+      rule: 'II.2',
       tier: 3,
       label: 'Thiếu định danh (Tag 1)',
       message: `Mẫu Tag 1 bắt buộc TÊN KH kết hợp ≥1 mã giao dịch. Đang thiếu: ${missing.join(
@@ -177,7 +177,7 @@ function checkMissingIdentifier(t: ZbsTemplate): Finding[] {
   ]
 }
 
-// ── 6. PARAM_FORMAT (G8) — định dạng tham số ───────────────────────
+// ── 6. PARAM_FORMAT (Zalo II.1 · tham số) — định dạng tham số ──
 // Cho phép tiền tố "$" của biến hệ thống (vd <$requestId>, <$zReqId>).
 const VALID_PARAM = /^<\$?[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*>$/
 function checkParamFormat(t: ZbsTemplate): Finding[] {
@@ -186,7 +186,7 @@ function checkParamFormat(t: ZbsTemplate): Finding[] {
   return [
     {
       check: 'PARAM_FORMAT',
-      rule: 'G8',
+      rule: 'II.1',
       tier: 2,
       label: 'Sai định dạng tham số',
       message:
@@ -199,7 +199,7 @@ function checkParamFormat(t: ZbsTemplate): Finding[] {
   ]
 }
 
-// ── 7. PARAM_NO_PREFIX (G9) — biến thiếu nhãn phía trước ──────────
+// ── 7. PARAM_NO_PREFIX (Zalo II.1 · tham số) — biến thiếu nhãn phía trước ──
 // Bảo thủ: chỉ cờ khi cả DÒNG chỉ gồm biến (không có chữ mô tả nào),
 // vd một dòng trơ "<discount_discountDesc>". Dòng "Nhãn: <biến>" thì OK.
 function checkParamNoPrefix(t: ZbsTemplate): Finding[] {
@@ -215,7 +215,7 @@ function checkParamNoPrefix(t: ZbsTemplate): Finding[] {
   return [
     {
       check: 'PARAM_NO_PREFIX',
-      rule: 'G9',
+      rule: 'II.1',
       tier: 2,
       label: 'Biến thiếu nhãn phía trước',
       message:
@@ -228,7 +228,7 @@ function checkParamNoPrefix(t: ZbsTemplate): Finding[] {
   ]
 }
 
-// ── 8. EMOJI_SPECIAL (G5) — emoji / ký tự trang trí ───────────────
+// ── 8. EMOJI_SPECIAL (Zalo II.1 · văn phong) — emoji / ký tự trang trí ──
 // LƯU Ý: KHÔNG dùng nguyên khối General Punctuation (U+2000–206F) vì nó chứa
 // dấu câu hợp lệ (em-dash "—", "…", nháy cong "" ''), sẽ báo nhầm là emoji.
 // Chỉ lấy đúng vài ký tự trang trí cần chặn (‼ ⁉ •) + các dải emoji thật.
@@ -244,7 +244,7 @@ function checkEmojiSpecial(t: ZbsTemplate): Finding[] {
   return [
     {
       check: 'EMOJI_SPECIAL',
-      rule: 'G5',
+      rule: 'II.1',
       tier: 2,
       label: 'Emoji / ký tự đặc biệt',
       message: 'Không dùng emoji hay ký tự trang trí trong nội dung.',
@@ -256,7 +256,7 @@ function checkEmojiSpecial(t: ZbsTemplate): Finding[] {
   ]
 }
 
-// ── 9. SUSPICIOUS_TYPO (G7) — lỗi đánh máy nghi ngờ ───────────────
+// ── 9. SUSPICIOUS_TYPO (Zalo II.1 · văn phong) — lỗi đánh máy nghi ngờ ──
 const TYPOS: { wrong: RegExp; right: string }[] = [
   { wrong: /kích\s*họa/gi, right: 'KÍCH HOẠT' },
   { wrong: /quý\s*kách/gi, right: 'quý khách' },
@@ -277,7 +277,7 @@ function checkSuspiciousTypo(t: ZbsTemplate): Finding[] {
   return [
     {
       check: 'SUSPICIOUS_TYPO',
-      rule: 'G7',
+      rule: 'II.1',
       tier: 2,
       label: 'Nghi ngờ lỗi đánh máy',
       message: 'Phát hiện từ nghi sai chính tả — cần người soát lại.',
@@ -288,7 +288,7 @@ function checkSuspiciousTypo(t: ZbsTemplate): Finding[] {
   ]
 }
 
-// ── 10. WORDING (P4) — "đơn hàng" phải là "mã đơn hàng" ───────────
+// ── 10. WORDING (Zalo II.2 · theo mục đích) — "đơn hàng" phải là "mã đơn hàng" ──
 // Chỉ cờ khi "đơn hàng" đứng trước 1 định danh (số/biến) mà thiếu tiền tố
 // "mã" — vd "Đơn hàng 589269". "Xác nhận đơn hàng" (dùng chung) thì bỏ qua.
 function checkWording(t: ZbsTemplate): Finding[] {
@@ -303,7 +303,7 @@ function checkWording(t: ZbsTemplate): Finding[] {
   return [
     {
       check: 'WORDING',
-      rule: 'P4',
+      rule: 'II.2',
       tier: 3,
       label: 'Wording chưa chính xác',
       message:
@@ -332,21 +332,21 @@ function buildChecklist(t: ZbsTemplate): ChecklistItem[] {
   const isRating = t.type === 'rating'
   return [
     {
-      rule: 'S2',
+      rule: 'II.1',
       label: 'Thanh toán đúng chủ',
       note: 'STK phải của chính DN sở hữu OA (hoặc có uỷ quyền thu hộ).',
       triggered: isPayment || PAYMENT_CTX_RE.test(c) || BANK_ACCOUNT_RE.test(c),
       hint: 'Có thông tin thanh toán/chuyển khoản — cần đối chiếu chủ tài khoản với OA.',
     },
     {
-      rule: 'S3',
+      rule: 'IV',
       label: 'Ngành xâm lấn / hạn chế',
       note: 'Mỹ phẩm xâm lấn, rượu bia, TPCN, thuốc… cần giấy phép.',
       triggered: RESTRICTED_RE.test(c),
       hint: 'Nội dung nhắc tới ngành hạn chế — yêu cầu giấy phép kinh doanh.',
     },
     {
-      rule: 'S1',
+      rule: 'II.3',
       label: 'Lễ Tết / sinh nhật',
       note: 'Dịp lễ bắt buộc kèm voucher/ưu đãi hợp lệ + dùng mẫu voucher.',
       triggered: FESTIVE_RE.test(c) || isVoucher,
@@ -355,19 +355,19 @@ function buildChecklist(t: ZbsTemplate): ChecklistItem[] {
         : 'Có dấu hiệu nội dung dịp lễ — kiểm tra voucher đính kèm.',
     },
     {
-      rule: 'G10',
+      rule: 'II.1',
       label: 'Quyền sở hữu logo',
       note: 'Có logo OA; quyền sở hữu logo cần giấy tờ chứng minh.',
       triggered: !!t.hasLogo,
       hint: 'Mẫu có logo/ảnh thương hiệu — cần giấy tờ chứng minh quyền sử dụng.',
     },
     {
-      rule: 'P2',
+      rule: 'II.1',
       label: 'Có phát sinh giao dịch',
       note: 'Chỉ gửi cho KH đã giao dịch (ngoại lệ: OTP tài khoản mới).',
     },
     {
-      rule: 'S5',
+      rule: 'II.2',
       label: 'Chương trình công khai',
       note: 'Tag 3 cần thông tin CT/sản phẩm công khai trên web chính thức.',
       triggered: isRating,
@@ -431,32 +431,32 @@ export function moderate(t: ZbsTemplate): ModerationResult {
 // 10 check đã chọn tự động — XẾP THEO ƯU TIÊN (impact = tần suất reject thật
 // + giá trị chặn). Tool hiển thị đúng thứ tự này ở "Bảng rule".
 export const CHECK_CATALOG = [
-  { check: 'MISSING_IDENTIFIER', rule: 'P1', autonomy: 'auto', label: 'Thiếu định danh (Tag 1)', why: 'Nguyên nhân reject #1 với Tag 1' },
-  { check: 'URL_IN_BODY', rule: 'G1', autonomy: 'auto', label: 'Link trong nội dung', why: 'Cực hay dính, regex chính xác' },
-  { check: 'PHONE_IN_BODY', rule: 'G2', autonomy: 'auto', label: 'SĐT trong nội dung', why: 'Reject phổ biến cùng nhóm link' },
-  { check: 'GROUP_CHAT_LINK', rule: 'G4', autonomy: 'auto', label: 'Link nhóm/chat MXH', why: 'Rõ ràng, blacklist domain' },
-  { check: 'SUSPICIOUS_TYPO', rule: 'G7', autonomy: 'semi', label: 'Nghi ngờ lỗi đánh máy', why: 'Reject thật (KÍCH HỌA), từ điển hẹp' },
-  { check: 'WORDING', rule: 'P4', autonomy: 'semi', label: 'Wording chưa chính xác', why: '"đơn hàng <mã>" thiếu tiền tố "mã"' },
-  { check: 'SHORTENED_LINK', rule: 'G3', autonomy: 'auto', label: 'Link rút gọn', why: 'Blacklist đơn giản, giá trị cao' },
-  { check: 'EMOJI_SPECIAL', rule: 'G5', autonomy: 'auto', label: 'Emoji / ký tự đặc biệt', why: 'Unicode range, chặn phủ đầu' },
-  { check: 'PARAM_FORMAT', rule: 'G8', autonomy: 'auto', label: 'Sai định dạng tham số', why: 'Regex sạch, phòng ngừa' },
-  { check: 'PARAM_NO_PREFIX', rule: 'G9', autonomy: 'semi', label: 'Biến thiếu nhãn phía trước', why: 'Semi, cần người xác nhận' },
+  { check: 'MISSING_IDENTIFIER', rule: 'II.2', autonomy: 'auto', label: 'Thiếu định danh (Tag 1)', why: 'Nguyên nhân reject #1 với Tag 1' },
+  { check: 'URL_IN_BODY', rule: 'II.1', autonomy: 'auto', label: 'Link trong nội dung', why: 'Cực hay dính, regex chính xác' },
+  { check: 'PHONE_IN_BODY', rule: 'II.1', autonomy: 'auto', label: 'SĐT trong nội dung', why: 'Reject phổ biến cùng nhóm link' },
+  { check: 'GROUP_CHAT_LINK', rule: 'II.1', autonomy: 'auto', label: 'Link nhóm/chat MXH', why: 'Rõ ràng, blacklist domain' },
+  { check: 'SUSPICIOUS_TYPO', rule: 'II.1', autonomy: 'semi', label: 'Nghi ngờ lỗi đánh máy', why: 'Reject thật (KÍCH HỌA), từ điển hẹp' },
+  { check: 'WORDING', rule: 'II.2', autonomy: 'semi', label: 'Wording chưa chính xác', why: '"đơn hàng <mã>" thiếu tiền tố "mã"' },
+  { check: 'SHORTENED_LINK', rule: 'II.1', autonomy: 'auto', label: 'Link rút gọn', why: 'Blacklist đơn giản, giá trị cao' },
+  { check: 'EMOJI_SPECIAL', rule: 'II.1', autonomy: 'auto', label: 'Emoji / ký tự đặc biệt', why: 'Unicode range, chặn phủ đầu' },
+  { check: 'PARAM_FORMAT', rule: 'II.1', autonomy: 'auto', label: 'Sai định dạng tham số', why: 'Regex sạch, phòng ngừa' },
+  { check: 'PARAM_NO_PREFIX', rule: 'II.1', autonomy: 'semi', label: 'Biến thiếu nhãn phía trước', why: 'Semi, cần người xác nhận' },
 ] as const
 
 // Rule CỐ TÌNH không tự động dù MÁY LÀM ĐƯỢC — đây mới là điểm prioritization.
 export const EXCLUDED_CATALOG = [
   {
-    rule: 'G6',
+    rule: 'II.1',
     label: 'Chính tả / 1 ngôn ngữ',
-    reason: 'Spellcheck toàn phần rất nhiễu → chỉ giữ từ điển typo hẹp (G7).',
+    reason: 'Spellcheck toàn phần rất nhiễu → chỉ giữ từ điển typo hẹp.',
   },
   {
-    rule: 'T1/T2',
+    rule: 'I',
     label: 'Phân loại Tag',
     reason: 'Cần phán đoán mục đích → để người chọn Loại template, tránh máy đoán sai.',
   },
   {
-    rule: 'P3',
+    rule: 'II.2',
     label: 'OTP mẫu mặc định',
     reason: 'OTP dùng mẫu cố định → xử lý bằng ngoại lệ, không cần check riêng.',
   },
