@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { moderate } from './lib/rules'
 import type {
   ModerationResult,
@@ -16,6 +16,7 @@ import {
 } from './lib/adapter'
 import { SAMPLES, DEFAULT_SAMPLE } from './lib/samples'
 import { RulesModal } from './components/RulesModal'
+import { RoomioSelect } from './components/RoomioSelect'
 import { installTapInteractions } from './lib/tapInteractions'
 
 function toJson(v: unknown): string {
@@ -86,23 +87,33 @@ export default function App() {
   )
   const [showRules, setShowRules] = useState(false)
 
+  // Chạy thủ công: chỉ phân tích snapshot đã "submit", không tự chạy mỗi phím.
+  const [submitted, setSubmitted] = useState(() => ({
+    input: toJson(DEFAULT_SAMPLE.raw),
+    type: DEFAULT_SAMPLE.type,
+  }))
+
   useEffect(() => installTapInteractions(), [])
 
-  // Gõ vào textarea cập nhật `input` ngay (UI mượt), nhưng phần phân tích nặng
-  // chỉ chạy trên giá trị đã hoãn (deferred) → tránh re-render nặng mỗi phím.
-  const deferredInput = useDeferredValue(input)
   const state = useMemo(
-    () => analyze(deferredInput, templateType),
-    [deferredInput, templateType],
+    () => analyze(submitted.input, submitted.type),
+    [submitted],
   )
-  const isStale = deferredInput !== input
+  // Đang có thay đổi chưa kiểm tra → làm mờ kết quả cũ để nhắc bấm lại.
+  const isDirty = input !== submitted.input || templateType !== submitted.type
+
+  function run() {
+    setSubmitted({ input, type: templateType })
+  }
 
   function loadSample(key: string) {
     const s = SAMPLES.find((x) => x.key === key)
     if (!s) return
-    setInput(toJson(s.raw))
+    const json = toJson(s.raw)
+    setInput(json)
     setTemplateType(s.type)
     setActiveKey(key)
+    setSubmitted({ input: json, type: s.type }) // mẫu mẫu chạy luôn cho tiện xem
   }
 
   return (
@@ -126,21 +137,29 @@ export default function App() {
           </button>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          <InputPanel
-            input={input}
-            activeKey={activeKey}
-            templateType={templateType}
-            format={state.ok ? state.format : null}
-            onChange={(v) => {
-              setInput(v)
-              setActiveKey('')
-            }}
-            onChangeType={setTemplateType}
-            onLoadSample={loadSample}
-          />
-          <ResultPanel state={state} isStale={isStale} />
-          <ChecklistPanel state={state} isStale={isStale} />
+        <div className="grid gap-y-8 lg:grid-cols-3 lg:gap-x-0">
+          <div className="lg:pr-8">
+            <InputPanel
+              input={input}
+              activeKey={activeKey}
+              templateType={templateType}
+              format={state.ok ? state.format : null}
+              dirty={isDirty}
+              onChange={(v) => {
+                setInput(v)
+                setActiveKey('')
+              }}
+              onChangeType={setTemplateType}
+              onLoadSample={loadSample}
+              onRun={run}
+            />
+          </div>
+          <div className="lg:border-l lg:border-black/10 lg:px-8">
+            <ResultPanel state={state} isStale={isDirty} />
+          </div>
+          <div className="lg:border-l lg:border-black/10 lg:pl-8">
+            <ChecklistPanel state={state} isStale={isDirty} />
+          </div>
         </div>
       </main>
 
@@ -150,25 +169,26 @@ export default function App() {
 }
 
 // ── Input ──────────────────────────────────────────────────────────
-const SELECT_CLS =
-  'cursor-pointer rounded-lg border-2 border-black bg-white px-3 py-1.5 text-xs font-black text-black focus:ring-2 focus:ring-blue-300 focus:outline-none'
-
 function InputPanel({
   input,
   activeKey,
   templateType,
   format,
+  dirty,
   onChange,
   onChangeType,
   onLoadSample,
+  onRun,
 }: {
   input: string
   activeKey: string
   templateType: TemplateType
   format: InputFormat | null
+  dirty: boolean
   onChange: (v: string) => void
   onChangeType: (t: TemplateType) => void
   onLoadSample: (key: string) => void
+  onRun: () => void
 }) {
   return (
     <section className="space-y-3">
@@ -182,43 +202,43 @@ function InputPanel({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <select
-          data-tap-zone="plain"
+        <RoomioSelect
+          compact
+          className="min-w-52 flex-1"
           value={activeKey}
-          onChange={(e) => onLoadSample(e.target.value)}
-          className={SELECT_CLS}
-        >
-          <option value="" disabled>
-            Chọn mẫu thử…
-          </option>
-          {SAMPLES.map((s) => (
-            <option key={s.key} value={s.key}>
-              {s.title}
-            </option>
-          ))}
-        </select>
-        <select
-          data-tap-zone="plain"
+          placeholder="Chọn mẫu thử…"
+          options={SAMPLES.map((s) => ({ value: s.key, label: s.title }))}
+          onChange={onLoadSample}
+        />
+        <RoomioSelect
+          compact
+          className="min-w-40 flex-1"
           value={templateType}
-          onChange={(e) => onChangeType(e.target.value as TemplateType)}
-          className={SELECT_CLS}
-        >
-          {TEMPLATE_TYPES.map((t) => (
-            <option key={t.value} value={t.value}>
-              Loại: {t.label}
-            </option>
-          ))}
-        </select>
+          options={TEMPLATE_TYPES.map((t) => ({
+            value: t.value,
+            label: `Loại: ${t.label}`,
+          }))}
+          onChange={(v) => onChangeType(v as TemplateType)}
+        />
       </div>
 
       <textarea
         value={input}
         onChange={(e) => onChange(e.target.value)}
         spellCheck={false}
-        className="h-[440px] w-full resize-none rounded-lg border-2 border-black bg-white px-3 py-2.5 font-mono text-[12px] leading-relaxed text-black focus:ring-2 focus:ring-blue-300 focus:outline-none"
+        className="h-[420px] w-full resize-none rounded-lg border-2 border-black bg-white px-3 py-2.5 font-mono text-[12px] leading-relaxed text-black focus:ring-2 focus:ring-blue-300 focus:outline-none"
       />
+
+      <button
+        onClick={onRun}
+        className="modal-action w-full rounded-[6px] border-2 border-black bg-blue-300 px-4 py-2.5 text-sm font-black text-black shadow-secondary transition-[transform,box-shadow] active:translate-x-[1px] active:translate-y-[1px]"
+      >
+        <span className="modal-action-label">Kiểm tra thử ngay!</span>
+      </button>
       <p className="text-[11px] font-semibold text-zinc-400">
-        Dán JSON ZBS thật (root.sections) hoặc schema phẳng — tool tự nhận diện.
+        {dirty
+          ? 'Bạn vừa sửa nội dung — bấm Kiểm tra thử ngay! để chạy lại.'
+          : 'Hỗ trợ JSON ZBS thật (root.sections) và schema phẳng — tool tự nhận diện.'}
       </p>
     </section>
   )
