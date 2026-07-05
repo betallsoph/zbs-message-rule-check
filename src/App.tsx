@@ -209,7 +209,7 @@ function InputPanel({
           compact
           className="min-w-52 flex-[2]"
           value={activeKey}
-          placeholder="Chọn mẫu thử…"
+          placeholder="Chọn mẫu demo…"
           options={SAMPLES.map((s) => ({ value: s.key, label: s.title }))}
           onChange={onLoadSample}
         />
@@ -224,6 +224,10 @@ function InputPanel({
           onChange={(v) => onChangeType(v as TemplateType)}
         />
       </div>
+      <p className="text-xs font-semibold text-zinc-500">
+        Dropdown trái chỉ là mẫu demo nếu chưa có JSON thật. Nếu có JSON thật,
+        dán vào ô dưới rồi chọn đúng Loại template.
+      </p>
 
       <textarea
         value={input}
@@ -241,7 +245,7 @@ function InputPanel({
       <p className="text-xs font-semibold text-zinc-500">
         {dirty
           ? 'Bạn vừa sửa nội dung hoặc đổi Loại — bấm Kiểm tra thử ngay! để chạy lại nha.'
-          : 'Cách dùng: chọn mẫu thử hoặc dán JSON, chọn đúng Loại template, rồi bấm Kiểm tra thử ngay!'}
+          : 'Bấm Kiểm tra thử ngay! để tool đọc JSON và trả lỗi/cảnh báo.'}
       </p>
     </section>
   )
