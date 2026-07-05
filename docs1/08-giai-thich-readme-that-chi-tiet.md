@@ -4,45 +4,45 @@ File này giải thích từng ý trong `README.md` để mình hiểu và trả
 
 ## 1. Tiêu đề README
 
-`ZBS Rule Check - Template Validation Tool`
+`ZBS Rule Check - Công cụ kiểm tra ZBS Template`
 
 Ý nghĩa: đây là tool check rule cho template ZBS trước khi gửi duyệt. Nó đúng với tên Challenge 2: Build a Template Validation Tool.
 
-## 2. Mục "Working tool for Challenge 2"
+## 2. Mục giới thiệu bài làm cho Challenge 2
 
 README nói tool này là bài làm cho Challenge 2, không phải Challenge 1. Challenge 2 yêu cầu:
 
 - Rule map.
-- Working tool.
-- Example inputs/outputs.
-- Note on AI usage.
+- Công cụ chạy được.
+- Sample input/output.
+- Ghi chú cách dùng AI.
 
 Vì vậy README đặt ngay bối cảnh để người chấm biết repo này trả lời đúng phần nào của đề.
 
-## 3. Mục "The tool helps..."
+## 3. Mục tool giúp gì
 
 README nói tool:
 
-- đọc template JSON,
-- chạy prioritized checks,
-- trả violations + suggestions,
-- liệt kê rule cần human review.
+- đọc JSON template,
+- chạy các check đã được ưu tiên,
+- trả lỗi/cảnh báo và gợi ý sửa,
+- liệt kê rule cần người kiểm tra thêm.
 
-Điểm quan trọng: dùng chữ **prioritized**, vì đề không yêu cầu cover all rules. Tool cũng không nói "guarantee approval".
+Điểm quan trọng: README nói rõ đây là nhóm rule **đã được ưu tiên**, vì đề không yêu cầu cover all rules. Tool cũng không nói chắc chắn được Zalo duyệt.
 
-## 4. Mục "Sources"
+## 4. Mục "Nguồn tham khảo"
 
 README liệt kê 5 nguồn:
 
 1. Quy định kiểm duyệt ZBS.
-2. Purpose/Tag setup guide.
-3. Image feature announcement.
-4. Image module rules.
-5. Zalo community policy.
+2. Hướng dẫn thiết lập mục đích gửi/Tag.
+3. Bài ra mắt tính năng hình ảnh.
+4. Quy định module hình ảnh.
+5. Chính sách cộng đồng Zalo.
 
 Lý do cần phần này: để chứng minh rule map không tự bịa. Mã `G/P/S/H/T` là internal code, nhưng rule source đến từ tài liệu chính thức.
 
-## 5. Mục "How To Run"
+## 5. Mục "Cách chạy"
 
 README ghi:
 
@@ -58,42 +58,42 @@ npm run build
 - `npm run dev`: chạy app local bằng Vite.
 - `npm run build`: kiểm tra TypeScript và build production.
 
-Khi nộp, nếu người chấm clone repo thì họ có thể chạy theo 3 lệnh này.
+Khi nộp, nếu người chấm clone repo thì họ có thể chạy theo 3 lệnh này. README cũng ghi thêm demo link để người chấm mở tool nhanh hơn.
 
-## 6. Mục "Deliverables"
+## 6. Mục "Các phần nộp"
 
 README trỏ đến:
 
 - `public/design/zbs_rule_map.md`: rule map chính.
 - `docs1/`: giải thích chi tiết.
-- `src/lib/adapter.ts`: đọc và chuẩn hóa input.
-- `src/lib/rules.ts`: rule engine.
-- `src/lib/samples.ts`: example inputs.
+- `src/lib/adapter.ts`: đọc và chuẩn hoá input.
+- `src/lib/rules.ts`: bộ chạy rule.
+- `src/lib/samples.ts`: ví dụ đầu vào/đầu ra.
 
-Đây là cách map repo với deliverable trong đề. Đề yêu cầu rule map + working tool + examples, nên README chỉ rõ mỗi phần nằm ở đâu.
+Đây là cách map repo với phần nộp trong đề. Đề yêu cầu rule map + công cụ chạy được + ví dụ, nên README chỉ rõ mỗi phần nằm ở đâu.
 
-## 7. Mục "Step 1 - Map The Rules"
+## 7. Mục "Bước 1 - Map rule"
 
 README nói rule được map thành:
 
-- `T`: Tag/purpose.
-- `G`: General rules.
-- `P`: Purpose-specific rules.
-- `S`: Special cases.
-- `H`: Image module rules.
+- `T`: Tag / mục đích gửi.
+- `G`: Quy định chung.
+- `P`: Quy định theo mục đích gửi.
+- `S`: Trường hợp đặc biệt.
+- `H`: Quy định module hình ảnh.
 
 Đây là cách hệ thống hóa ruleset. Nó không phủ nhận cấu trúc gốc của Zalo; mỗi code vẫn có source như `Zalo II.1` hoặc `Zalo II.2`.
 
 Nếu bị hỏi: "Sao không dùng số mục Zalo luôn?"  
 Trả lời: Vì `II.1` chứa nhiều rule nhỏ. Internal code giúp output actionable hơn.
 
-## 8. Mục "Step 2 - Prioritize Checks"
+## 8. Mục "Bước 2 - Ưu tiên rule để tự động kiểm tra"
 
 README liệt kê 3 tiêu chí:
 
-1. Check được từ JSON/content.
-2. Có impact cao trong sample reject.
-3. Tránh false positive.
+1. Check được từ JSON/nội dung template.
+2. Có tác động cao trong sample reject.
+3. Ít cần suy đoán của người hoặc giấy tờ bên ngoài.
 
 Đây chính là product thinking. Ví dụ:
 
@@ -103,9 +103,9 @@ README liệt kê 3 tiêu chí:
 
 Vì vậy tool chỉ code 10 check, còn các phần khác đưa vào checklist.
 
-## 9. Bảng automated/semi-automated checks
+## 9. Bảng các mục kiểm tự động/bán tự động
 
-README bảng này là phần quan trọng nhất của Step 2.
+README bảng này là phần quan trọng nhất của Bước 2.
 
 Giải thích từng dòng:
 
@@ -120,21 +120,21 @@ Giải thích từng dòng:
 - `PARAM_FORMAT` / `G8`: Tham số phải đúng format.
 - `PARAM_NO_PREFIX` / `G9`: Biến cần có nhãn phía trước.
 
-## 10. Mục "Human-review checklist"
+## 10. Mục checklist cần người kiểm thêm
 
 README liệt kê phần không auto:
 
-- Prior transaction.
-- Payment account ownership.
-- Logo/brand ownership.
-- Restricted industries.
-- Promotion campaign context.
-- Voucher/holiday/birthday.
-- Image module requirements.
+- Khách nhận tin đã phát sinh giao dịch.
+- Tài khoản thanh toán đúng chủ.
+- Quyền sở hữu logo/thương hiệu.
+- Ngành hàng hạn chế.
+- Ngữ cảnh chương trình hậu mãi/khuyến mãi công khai.
+- Voucher/sinh nhật/dịp lễ.
+- Quy định module hình ảnh.
 
 Lý do có checklist: nhiều rule cần dữ liệu ngoài JSON. Nếu tool tự reject/pass các phần này thì dễ sai. Checklist giúp business nhớ tự chuẩn bị bằng chứng trước khi submit.
 
-## 11. Mục "Input Notes"
+## 11. Mục "Dữ liệu đầu vào"
 
 README nói tool nhận:
 
@@ -145,7 +145,7 @@ Và nói Excel chứa pseudo/invalid JSON.
 
 Điều này quan trọng vì file Excel sample tải về không phải JSON parseable trực tiếp. Nếu người chấm copy nguyên cell vào tool, tool báo invalid input là có chủ đích, không crash.
 
-## 12. Mục "Example Coverage"
+## 12. Mục "Ví dụ đầu vào/đầu ra"
 
 README chọn các sample reject quan trọng:
 
@@ -158,14 +158,14 @@ README chọn các sample reject quan trọng:
 
 Đây là bằng chứng tool không chỉ viết rule lý thuyết mà có đối chiếu dữ liệu đề.
 
-## 13. Mục "AI Usage"
+## 13. Mục "Cách dùng AI"
 
 README nói AI dùng để:
 
 - đọc ruleset,
 - cấu trúc rule map,
-- prioritize checks,
-- implement TypeScript,
+- ưu tiên check,
+- viết TypeScript,
 - draft docs.
 
 Nhưng AI không dùng để tự bịa rule. Mọi rule phải có source hoặc nằm trong checklist nếu không chắc.
