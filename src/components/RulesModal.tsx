@@ -80,7 +80,7 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
               </p>
             </div>
           ))}
-          <p className="mt-3 text-[11px] font-semibold text-zinc-400">
+          <p className="mt-3 text-xs font-semibold text-zinc-500">
             Nhóm cần người kiểm duyệt (thanh toán đúng chủ, đối tượng nhận
             tin, quyền logo, dịp lễ, ngành hạn chế…) cần giấy tờ/ngữ cảnh → chỉ
             liệt kê ở checklist, máy không tự phán.

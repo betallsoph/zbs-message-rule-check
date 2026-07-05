@@ -238,10 +238,10 @@ function InputPanel({
       >
         <span className="modal-action-label">Kiểm tra thử ngay!</span>
       </button>
-      <p className="text-[11px] font-semibold text-zinc-400">
+      <p className="text-xs font-semibold text-zinc-500">
         {dirty
-          ? 'Bạn vừa sửa nội dung — bấm Kiểm tra thử ngay! để chạy lại nha.'
-          : 'Dán JSON của mẫu tin vào đây rồi bấm nút. Tool tự hiểu định dạng.'}
+          ? 'Bạn vừa sửa nội dung hoặc đổi Loại — bấm Kiểm tra thử ngay! để chạy lại nha.'
+          : 'Cách dùng: chọn mẫu thử hoặc dán JSON, chọn đúng Loại template, rồi bấm Kiểm tra thử ngay!'}
       </p>
     </section>
   )
@@ -408,7 +408,7 @@ function HumanChecklist({ items }: { items: ModerationResult['checklist'] }) {
     <div>
       <p className="mb-1 text-sm font-black text-blue-600">
         Cần người kiểm duyệt
-        <span className="font-bold text-zinc-400">
+        <span className="font-bold text-zinc-500">
           {' · '}
           {flagged.length} mục có dấu hiệu
         </span>
@@ -430,8 +430,10 @@ function HumanChecklist({ items }: { items: ModerationResult['checklist'] }) {
       ))}
 
       {rest.length > 0 && (
-        <p className="mt-2 text-[11px] leading-relaxed font-semibold text-zinc-400">
-          {flagged.length > 0 ? 'Nhớ tự kiểm thêm khi gửi: ' : 'Cần tự kiểm thêm khi gửi: '}
+        <p className="mt-2 text-xs leading-relaxed font-semibold text-zinc-500">
+          <span className="font-black text-zinc-600">
+            {flagged.length > 0 ? 'Nhớ tự kiểm thêm khi gửi: ' : 'Cần tự kiểm thêm khi gửi: '}
+          </span>
           {rest.map((it) => `${it.label} (${it.rule} · ${it.source})`).join(' · ')}
         </p>
       )}
