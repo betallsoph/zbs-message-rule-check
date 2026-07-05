@@ -17,7 +17,7 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex shrink-0 items-center justify-between px-6 pt-5 pb-4">
-          <h2 className="text-lg font-black text-black">10 check tự động</h2>
+          <h2 className="text-lg font-black text-black">10 mục máy tự kiểm</h2>
           <button
             data-tap-zone="plain"
             className="cursor-pointer rounded-[6px] p-1.5 text-black hover:bg-zinc-100"
@@ -30,9 +30,9 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
 
         <div className="overflow-y-auto px-6 pb-6">
           <p className="mb-2 text-xs font-semibold text-zinc-500">
-            10 check được chọn tự động, xếp theo ưu tiên (impact = tần suất
-            reject thật + giá trị chặn). Mã (I, II.1, II.2, II.3, IV) là số mục
-            trong quy định gốc của Zalo.
+            10 mục máy tự kiểm, xếp theo mức quan trọng (cái hay bị từ chối
+            nhất để trên đầu). Mã (I, II.1, II.2, II.3, IV) là số mục trong quy
+            định gốc của Zalo.
           </p>
           {CHECK_CATALOG.map((c, i) => (
             <div

@@ -32,12 +32,12 @@ const PSEUDO_RE = /(string"|bool(true|false)|\{\d+ item|\[\d+ item|:NULL)/
 
 function analyze(raw: string, type: TemplateType): ParseState {
   const trimmed = raw.trim()
-  if (!trimmed) return { ok: false, error: 'Chưa có nội dung JSON.' }
+  if (!trimmed) return { ok: false, error: 'Bạn chưa dán nội dung nào.' }
   if (PSEUDO_RE.test(trimmed)) {
     return {
       ok: false,
       error:
-        'Đây là format hiển thị của sheet (string"…", "{7 items"…), không phải JSON chuẩn. Hãy dán JSON thật (có "root" / "sections").',
+        'Đây là kiểu hiển thị trong file Excel (string"…", "{7 items"…), không phải JSON thật. Bạn mở JSON gốc rồi dán vào nha.',
     }
   }
 
@@ -50,7 +50,10 @@ function analyze(raw: string, type: TemplateType): ParseState {
     return { ok: false, error: 'JSON không hợp lệ: ' + (e as Error).message }
   }
   if (!isJsonObject(parsed))
-    return { ok: false, error: 'JSON phải là một object mẫu tin.' }
+    return {
+      ok: false,
+      error: 'JSON phải là một object mẫu tin (bắt đầu bằng dấu {).',
+    }
 
   const format = detectFormat(parsed)
 
@@ -67,8 +70,8 @@ function analyze(raw: string, type: TemplateType): ParseState {
         ok: false,
         error:
           format === 'zbs'
-            ? 'Không trích được nội dung nào từ root.sections[].'
-            : 'Thiếu trường "content" (nội dung mẫu).',
+            ? 'Không đọc được nội dung nào trong JSON này.'
+            : 'Thiếu phần nội dung (content) của mẫu.',
       }
     return { ok: true, result: moderate(template), format }
   } catch (e) {
@@ -196,7 +199,7 @@ function InputPanel({
         <p className="text-sm font-black text-blue-600">Mẫu tin JSON</p>
         {format && (
           <span className="text-[11px] font-bold text-zinc-500">
-            {format === 'zbs' ? 'Đã nhận: JSON ZBS' : 'Đã nhận: schema phẳng'}
+            {format === 'zbs' ? 'Đã nhận: JSON ZBS' : 'Đã nhận: kiểu gọn'}
           </span>
         )}
       </div>
@@ -237,8 +240,8 @@ function InputPanel({
       </button>
       <p className="text-[11px] font-semibold text-zinc-400">
         {dirty
-          ? 'Bạn vừa sửa nội dung — bấm Kiểm tra thử ngay! để chạy lại.'
-          : 'Hỗ trợ JSON ZBS thật (root.sections) và schema phẳng — tool tự nhận diện.'}
+          ? 'Bạn vừa sửa nội dung — bấm Kiểm tra thử ngay! để chạy lại nha.'
+          : 'Dán JSON của mẫu tin vào đây rồi bấm nút. Tool tự hiểu định dạng.'}
       </p>
     </section>
   )
@@ -249,17 +252,17 @@ const STATUS = {
   pass: {
     word: 'ĐẠT',
     text: 'text-green-700',
-    line: 'Không phát hiện vi phạm trong 10 check tự động.',
+    line: 'Máy không thấy lỗi nào trong 10 mục tự kiểm.',
   },
   review: {
     word: 'CẦN SOÁT',
     text: 'text-amber-700',
-    line: 'Có cảnh báo bán tự động — cần người xác nhận.',
+    line: 'Có vài chỗ máy nghi nghi — bạn xem lại giúp nha.',
   },
   fail: {
     word: 'TỪ CHỐI',
     text: 'text-red-700',
-    line: 'Vi phạm rule tự động — sửa rồi gửi duyệt lại.',
+    line: 'Có lỗi máy bắt được — sửa rồi hẵng gửi duyệt nha.',
   },
 } as const
 
@@ -275,7 +278,9 @@ function ResultPanel({
       <section className="space-y-2">
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm font-black text-blue-600">Kết quả</p>
-          <span className="text-xs font-black text-red-600">LỖI JSON</span>
+          <span className="text-xs font-black text-red-600">
+            JSON CHƯA ĐÚNG
+          </span>
         </div>
         <p className="text-xs font-bold text-red-600">{state.error}</p>
       </section>
@@ -302,7 +307,7 @@ function ResultPanel({
             {result.tag ?? 'Chưa gắn Tag'}
           </span>
           {' · '}
-          {result.paramCount} tham số{' · '}
+          {result.paramCount} ô điền{' · '}
           <span className={result.errors.length ? 'text-red-600' : ''}>
             {result.errors.length} lỗi
           </span>
@@ -426,7 +431,7 @@ function HumanChecklist({ items }: { items: ModerationResult['checklist'] }) {
 
       {rest.length > 0 && (
         <p className="mt-2 text-[11px] leading-relaxed font-semibold text-zinc-400">
-          {flagged.length > 0 ? 'Đối chiếu thêm khi phát hành: ' : 'Cần đối chiếu khi phát hành: '}
+          {flagged.length > 0 ? 'Nhớ tự kiểm thêm khi gửi: ' : 'Cần tự kiểm thêm khi gửi: '}
           {rest.map((it) => `${it.label} (${it.rule})`).join(' · ')}
         </p>
       )}

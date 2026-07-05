@@ -73,7 +73,7 @@ export const SAMPLES: Sample[] = [
   },
   {
     key: '589221',
-    title: '#589221 · Link + SĐT trong body',
+    title: '#589221 · Link + SĐT trong nội dung',
     type: 'custom',
     format: 'zbs',
     expect: 'URL_IN_BODY, PHONE_IN_BODY',
@@ -268,7 +268,7 @@ export const SAMPLES: Sample[] = [
   },
   {
     key: 'shorten',
-    title: 'Link rút gọn ở CTA',
+    title: 'Link rút gọn ở nút bấm',
     type: 'custom',
     format: 'zbs',
     expect: 'SHORTENED_LINK',
@@ -288,7 +288,7 @@ export const SAMPLES: Sample[] = [
   },
   {
     key: 'flat',
-    title: 'Demo · schema phẳng',
+    title: 'Demo · kiểu gọn',
     type: 'custom',
     format: 'flat',
     expect: 'Không vi phạm (format phẳng)',

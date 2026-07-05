@@ -52,11 +52,11 @@ function checkPhoneInBody(t: ZbsTemplate): Finding[] {
       tier: 2,
       label: 'SĐT trong nội dung',
       message:
-        'Số điện thoại/hotline không được đặt trong nội dung — chỉ để ở nút CTA.',
+        'Số điện thoại/hotline không được để trong nội dung — chỉ để ở nút bấm.',
       severity: 'error',
       autonomy: 'auto',
       evidence: [...new Set(hits)],
-      suggestion: 'Chuyển số điện thoại vào nút thao tác (CTA gọi điện).',
+      suggestion: 'Đưa số điện thoại vào nút bấm gọi, đừng để trong nội dung.',
     },
   ]
 }
@@ -75,11 +75,11 @@ function checkUrlInBody(t: ZbsTemplate): Finding[] {
       rule: 'II.1',
       tier: 2,
       label: 'Link trong nội dung',
-      message: 'URL phải đặt ở nút CTA, không được nằm trong phần nội dung.',
+      message: 'Link phải để ở nút bấm, không được nằm trong phần nội dung.',
       severity: 'error',
       autonomy: 'auto',
       evidence: [...new Set(hits)],
-      suggestion: 'Đưa đường dẫn vào nút thao tác (CTA mở link).',
+      suggestion: 'Đưa link vào nút bấm mở link, đừng để trong nội dung.',
     },
   ]
 }
@@ -109,9 +109,9 @@ function checkGroupChatLink(t: ZbsTemplate): Finding[] {
       check: 'GROUP_CHAT_LINK',
       rule: 'II.1',
       tier: 2,
-      label: 'Link nhóm / chat MXH',
+      label: 'Link nhóm / chat mạng xã hội',
       message:
-        'Cấm dẫn tới nhóm/nhóm chat MXH (Zalo/FB/Telegram), Messenger hay Zalo cá nhân.',
+        'Không được dẫn tới nhóm/nhóm chat mạng xã hội (Zalo/Facebook/Telegram), Messenger hay Zalo cá nhân.',
       severity: 'error',
       autonomy: 'auto',
       evidence: [...new Set(evidence)],
@@ -131,11 +131,11 @@ function checkShortenedLink(t: ZbsTemplate): Finding[] {
       rule: 'II.1',
       tier: 2,
       label: 'Link rút gọn',
-      message: 'Cấm dùng link rút gọn (bit.ly, tinyurl, onelink…) ở CTA.',
+      message: 'Không dùng link rút gọn (bit.ly, tinyurl, onelink…).',
       severity: 'error',
       autonomy: 'auto',
       evidence: [...new Set(evidence)],
-      suggestion: 'Dùng đường dẫn đầy đủ, chính chủ của OA.',
+      suggestion: 'Dùng link đầy đủ, chính chủ của thương hiệu.',
     },
   ]
 }
@@ -165,14 +165,14 @@ function checkMissingIdentifier(t: ZbsTemplate): Finding[] {
       rule: 'II.2',
       tier: 3,
       label: 'Thiếu định danh (Tag 1)',
-      message: `Mẫu Tag 1 bắt buộc TÊN KH kết hợp ≥1 mã giao dịch. Đang thiếu: ${missing.join(
+      message: `Tin giao dịch (Tag 1) bắt buộc phải có TÊN khách hàng và ít nhất 1 mã (mã đơn/mã KH/mã HĐ). Đang thiếu: ${missing.join(
         ' + ',
       )}.`,
       severity: 'error',
       autonomy: 'auto',
-      evidence: params.length ? params : ['(không tìm thấy tham số nào)'],
+      evidence: params.length ? params : ['(không tìm thấy ô điền nào)'],
       suggestion:
-        'Thêm biến tên KH và mã giao dịch, vd <customer_name> + <order_orderCode>.',
+        'Thêm ô điền tên khách và mã giao dịch, vd <customer_name> + <order_orderCode>.',
     },
   ]
 }
@@ -188,13 +188,13 @@ function checkParamFormat(t: ZbsTemplate): Finding[] {
       check: 'PARAM_FORMAT',
       rule: 'II.1',
       tier: 2,
-      label: 'Sai định dạng tham số',
+      label: 'Sai định dạng ô điền',
       message:
-        'Tham số phải bọc trong < >, không dấu cách/dấu tiếng Việt, nối các phần bằng "_".',
+        'Ô điền tự động (biến) phải bọc trong < >, không dấu cách, không dấu tiếng Việt, nối các chữ bằng "_".',
       severity: 'error',
       autonomy: 'auto',
       evidence: [...new Set(bad)],
-      suggestion: 'Ví dụ hợp lệ: <order_orderCode>, <customer_name>.',
+      suggestion: 'Ví dụ đúng: <order_orderCode>, <customer_name>.',
     },
   ]
 }
@@ -217,13 +217,13 @@ function checkParamNoPrefix(t: ZbsTemplate): Finding[] {
       check: 'PARAM_NO_PREFIX',
       rule: 'II.1',
       tier: 2,
-      label: 'Biến thiếu nhãn phía trước',
+      label: 'Ô điền thiếu nhãn phía trước',
       message:
-        'Mỗi biến cần một nhãn mô tả đứng trước (vd "Mã đơn: <order_orderCode>"), không để biến đứng trơ.',
+        'Mỗi ô điền cần một nhãn mô tả đứng trước (vd "Mã đơn: <order_orderCode>"), không để nó đứng trơ một mình.',
       severity: 'warning',
       autonomy: 'semi',
       evidence: [...new Set(evidence)],
-      suggestion: 'Thêm nhãn phía trước biến, vd "Tên khách hàng: <customer_name>".',
+      suggestion: 'Thêm nhãn phía trước, vd "Tên khách hàng: <customer_name>".',
     },
   ]
 }
@@ -334,9 +334,9 @@ function buildChecklist(t: ZbsTemplate): ChecklistItem[] {
     {
       rule: 'II.1',
       label: 'Thanh toán đúng chủ',
-      note: 'STK phải của chính DN sở hữu OA (hoặc có uỷ quyền thu hộ).',
+      note: 'Số tài khoản nhận tiền phải của chính doanh nghiệp sở hữu OA (hoặc có uỷ quyền thu hộ).',
       triggered: isPayment || PAYMENT_CTX_RE.test(c) || BANK_ACCOUNT_RE.test(c),
-      hint: 'Có thông tin thanh toán/chuyển khoản — cần đối chiếu chủ tài khoản với OA.',
+      hint: 'Có thông tin thanh toán/chuyển khoản — cần xem số tài khoản có đúng của doanh nghiệp không.',
     },
     {
       rule: 'IV',
@@ -351,8 +351,8 @@ function buildChecklist(t: ZbsTemplate): ChecklistItem[] {
       note: 'Dịp lễ bắt buộc kèm voucher/ưu đãi hợp lệ + dùng mẫu voucher.',
       triggered: FESTIVE_RE.test(c) || isVoucher,
       hint: isVoucher
-        ? 'Template voucher — kiểm tra ưu đãi hợp lệ & dùng đúng mẫu voucher.'
-        : 'Có dấu hiệu nội dung dịp lễ — kiểm tra voucher đính kèm.',
+        ? 'Mẫu voucher — kiểm tra ưu đãi có hợp lệ và dùng đúng mẫu voucher không.'
+        : 'Có dấu hiệu nội dung dịp lễ — nhớ kèm voucher/ưu đãi.',
     },
     {
       rule: 'II.1',
@@ -364,14 +364,14 @@ function buildChecklist(t: ZbsTemplate): ChecklistItem[] {
     {
       rule: 'II.1',
       label: 'Có phát sinh giao dịch',
-      note: 'Chỉ gửi cho KH đã giao dịch (ngoại lệ: OTP tài khoản mới).',
+      note: 'Chỉ gửi cho khách đã từng giao dịch (trừ OTP tài khoản mới).',
     },
     {
       rule: 'II.2',
       label: 'Chương trình công khai',
-      note: 'Tag 3 cần thông tin CT/sản phẩm công khai trên web chính thức.',
+      note: 'Tin hậu mãi (Tag 3) cần thông tin chương trình/sản phẩm công khai trên web chính thức.',
       triggered: isRating,
-      hint: isRating ? 'Template hậu mãi (Tag 3) — kiểm tra thông tin công khai.' : undefined,
+      hint: isRating ? 'Tin hậu mãi (Tag 3) — kiểm tra thông tin có công khai không.' : undefined,
     },
   ]
 }
@@ -431,16 +431,16 @@ export function moderate(t: ZbsTemplate): ModerationResult {
 // 10 check đã chọn tự động — XẾP THEO ƯU TIÊN (impact = tần suất reject thật
 // + giá trị chặn). Tool hiển thị đúng thứ tự này ở "Bảng rule".
 export const CHECK_CATALOG = [
-  { check: 'MISSING_IDENTIFIER', rule: 'II.2', autonomy: 'auto', label: 'Thiếu định danh (Tag 1)', why: 'Nguyên nhân reject #1 với Tag 1' },
-  { check: 'URL_IN_BODY', rule: 'II.1', autonomy: 'auto', label: 'Link trong nội dung', why: 'Cực hay dính, regex chính xác' },
-  { check: 'PHONE_IN_BODY', rule: 'II.1', autonomy: 'auto', label: 'SĐT trong nội dung', why: 'Reject phổ biến cùng nhóm link' },
-  { check: 'GROUP_CHAT_LINK', rule: 'II.1', autonomy: 'auto', label: 'Link nhóm/chat MXH', why: 'Rõ ràng, blacklist domain' },
-  { check: 'SUSPICIOUS_TYPO', rule: 'II.1', autonomy: 'semi', label: 'Nghi ngờ lỗi đánh máy', why: 'Reject thật (KÍCH HỌA), từ điển hẹp' },
-  { check: 'WORDING', rule: 'II.2', autonomy: 'semi', label: 'Wording chưa chính xác', why: '"đơn hàng <mã>" thiếu tiền tố "mã"' },
-  { check: 'SHORTENED_LINK', rule: 'II.1', autonomy: 'auto', label: 'Link rút gọn', why: 'Blacklist đơn giản, giá trị cao' },
-  { check: 'EMOJI_SPECIAL', rule: 'II.1', autonomy: 'auto', label: 'Emoji / ký tự đặc biệt', why: 'Unicode range, chặn phủ đầu' },
-  { check: 'PARAM_FORMAT', rule: 'II.1', autonomy: 'auto', label: 'Sai định dạng tham số', why: 'Regex sạch, phòng ngừa' },
-  { check: 'PARAM_NO_PREFIX', rule: 'II.1', autonomy: 'semi', label: 'Biến thiếu nhãn phía trước', why: 'Semi, cần người xác nhận' },
+  { check: 'MISSING_IDENTIFIER', rule: 'II.2', autonomy: 'auto', label: 'Thiếu định danh (Tag 1)', why: 'Lý do bị từ chối nhiều nhất ở tin giao dịch' },
+  { check: 'URL_IN_BODY', rule: 'II.1', autonomy: 'auto', label: 'Link trong nội dung', why: 'Rất hay mắc, máy bắt chính xác' },
+  { check: 'PHONE_IN_BODY', rule: 'II.1', autonomy: 'auto', label: 'SĐT trong nội dung', why: 'Hay bị từ chối, cùng nhóm với lỗi link' },
+  { check: 'GROUP_CHAT_LINK', rule: 'II.1', autonomy: 'auto', label: 'Link nhóm / chat mạng xã hội', why: 'Máy nhận ra link nhóm ngay' },
+  { check: 'SUSPICIOUS_TYPO', rule: 'II.1', autonomy: 'semi', label: 'Nghi ngờ lỗi đánh máy', why: 'Từng bị từ chối thật (vd "KÍCH HỌA")' },
+  { check: 'WORDING', rule: 'II.2', autonomy: 'semi', label: 'Wording chưa chính xác', why: 'Viết "đơn hàng 123" mà thiếu chữ "mã"' },
+  { check: 'SHORTENED_LINK', rule: 'II.1', autonomy: 'auto', label: 'Link rút gọn', why: 'Dễ nhận ra, chặn được nhiều rủi ro' },
+  { check: 'EMOJI_SPECIAL', rule: 'II.1', autonomy: 'auto', label: 'Emoji / ký tự đặc biệt', why: 'Bắt được mọi emoji, chặn từ đầu' },
+  { check: 'PARAM_FORMAT', rule: 'II.1', autonomy: 'auto', label: 'Sai định dạng ô điền', why: 'Máy bắt gọn, phòng trước cho chắc' },
+  { check: 'PARAM_NO_PREFIX', rule: 'II.1', autonomy: 'semi', label: 'Ô điền thiếu nhãn phía trước', why: 'Máy chỉ nhắc, bạn xem lại cho chắc' },
 ] as const
 
 // Rule CỐ TÌNH không tự động dù MÁY LÀM ĐƯỢC — đây mới là điểm prioritization.
@@ -448,16 +448,19 @@ export const EXCLUDED_CATALOG = [
   {
     rule: 'II.1',
     label: 'Chính tả / 1 ngôn ngữ',
-    reason: 'Spellcheck toàn phần rất nhiễu → chỉ giữ từ điển typo hẹp.',
+    reason:
+      'Dò lỗi chính tả cả bài thì hay báo nhầm chữ đúng thành sai, nên mình chỉ bắt vài lỗi hay gặp cho chắc.',
   },
   {
     rule: 'I',
     label: 'Phân loại Tag',
-    reason: 'Cần phán đoán mục đích → để người chọn Loại template, tránh máy đoán sai.',
+    reason:
+      'Đoán tin thuộc loại nào thì cần hiểu ý người viết, máy đoán dễ trật. Nên mình để bạn tự chọn Loại cho chắc.',
   },
   {
     rule: 'II.2',
     label: 'OTP mẫu mặc định',
-    reason: 'OTP dùng mẫu cố định → xử lý bằng ngoại lệ, không cần check riêng.',
+    reason:
+      'Tin OTP đã có mẫu cố định sẵn, nên mình bỏ qua vài luật cho nó, không cần bắt.',
   },
 ] as const
