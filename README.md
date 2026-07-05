@@ -1,7 +1,5 @@
 # ZBS Rule Check - Công cụ kiểm tra ZBS Template
 
-Đây là bài làm cho **Challenge 2 - Build a Template Validation Tool** trong bài test Product Intern của ZBS.
-
 Công cụ giúp doanh nghiệp tự kiểm tra nhanh mẫu tin ZBS trước khi gửi duyệt. Công cụ nhận JSON template, chạy một nhóm rule đã được ưu tiên, trả về lỗi/cảnh báo kèm gợi ý sửa, và liệt kê các rule vẫn cần người kiểm tra thêm.
 
 Demo: https://rulecheck.tranthienan.id.vn
