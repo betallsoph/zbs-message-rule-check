@@ -59,8 +59,12 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
             </div>
           ))}
 
-          <p className="mt-4 mb-1 text-sm font-black text-blue-600">
-            Cố tình không tự động (dù máy làm được)
+          <p className="mt-5 text-sm font-black text-blue-600">
+            Mấy cái này mình cố tình để yên, không tự động nha
+          </p>
+          <p className="mb-1 text-[11px] font-semibold text-zinc-500">
+            Không phải máy làm không được đâu — mà làm ẩu thì dễ báo sai, làm
+            phiền bạn. Nên mình thà nhường cho người, lý do cụ thể ở từng dòng.
           </p>
           {EXCLUDED_CATALOG.map((e) => (
             <div key={e.rule} className="border-b border-black/10 py-2.5">
