@@ -86,14 +86,15 @@ Công cụ hỗ trợ:
 
 1. **JSON ZBS hợp lệ** có cấu trúc `root.sections[]`.
 2. **Schema demo dạng phẳng** như `{ content, buttons, params, tag }`.
+3. **Cell JSON copy trực tiếp từ Excel đề bài** ở cả 2 sheet `Format json` và `Sample json`.
 
-File Excel sample đi kèm đề bài có một số cell hiển thị pseudo/invalid JSON như `string"..."`, `{7 items`, `booltrue`. Công cụ cố tình nhận diện format này và báo lỗi thân thiện. Đây được xem là case test lỗi input, không phải JSON chuẩn để parse trực tiếp.
+File Excel sample đi kèm đề bài hiển thị JSON theo dạng viewer dump như `string"..."`, `{7 items`, `booltrue`, nên không phải JSON chuẩn để `JSON.parse`. Công cụ vẫn cố gắng trích text, tham số, CTA/link, logo/image từ format này để chạy các rule pre-check. Nếu người dùng có JSON chuẩn thì tool sẽ parse theo luồng JSON chuẩn.
 
 Lưu ý: kết quả `ĐẠT/pass` chỉ có nghĩa là công cụ chưa tìm thấy lỗi trong các mục kiểm tự động đã ưu tiên. Kết quả này **không đảm bảo mẫu chắc chắn được Zalo duyệt**, vì nhiều rule chính thức vẫn cần người kiểm tra giấy tờ, hình ảnh, quyền sở hữu, dữ liệu giao dịch hoặc ngữ cảnh doanh nghiệp.
 
 ## Ví dụ đầu vào/đầu ra
 
-Các ví dụ dưới đây lấy từ sheet `Sample json` trong file `Json Template.xlsx` của đề bài. Vì cell trong Excel là dạng viewer dump (`string"..."`, `{7 items`, `booltrue`) nên repo lưu lại bản JSON chuẩn hoá từ chính các dòng sample đó để tool có thể parse và chạy được.
+Các ví dụ dưới đây lấy từ sheet `Sample json` trong file `Json Template.xlsx` của đề bài. Repo lưu thêm bản JSON chuẩn hoá từ chính các dòng sample đó để người chấm có thể mở input/output rõ ràng bên cạnh luồng paste trực tiếp cell Excel trong UI.
 
 - [`public/examples/589221-input.json`](public/examples/589221-input.json) -> [`public/examples/589221-output.json`](public/examples/589221-output.json)
 - [`public/examples/589220-input.json`](public/examples/589220-input.json) -> [`public/examples/589220-output.json`](public/examples/589220-output.json)

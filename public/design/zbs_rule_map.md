@@ -117,7 +117,7 @@ Input tool hỗ trợ:
 
 - JSON ZBS chuẩn: object có `root.sections[]`.
 - Schema demo dạng phẳng: `{ content, buttons, params, tag }`.
-- Pseudo JSON trong Excel (`string"..."`, `{7 items`, `booltrue`) được coi là invalid input để test error handling.
+- Pseudo JSON copy trực tiếp từ file Excel đề bài (`string"..."`, `{7 items`, `booltrue`) ở cả 2 sheet `Format json` và `Sample json`. Tool trích text, tham số, CTA/link, logo/image từ format này để chạy rule.
 - Ví dụ input/output cụ thể nằm trong `public/examples/`. Các file này lấy từ sheet `Sample json` trong file `Json Template.xlsx` của đề bài và được chuẩn hoá thành JSON parse được:
   - `589221-input.json` -> `589221-output.json`
   - `589220-input.json` -> `589220-output.json`

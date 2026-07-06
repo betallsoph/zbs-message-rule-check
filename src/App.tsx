@@ -12,6 +12,7 @@ import {
   isJsonObject,
   normalizeZbs,
   normalizeFlat,
+  normalizeExcelDump,
   TEMPLATE_TYPES,
 } from './lib/adapter'
 import { SAMPLES, DEFAULT_SAMPLE } from './lib/samples'
@@ -34,10 +35,21 @@ function analyze(raw: string, type: TemplateType): ParseState {
   const trimmed = raw.trim()
   if (!trimmed) return { ok: false, error: 'Bạn chưa dán nội dung nào.' }
   if (PSEUDO_RE.test(trimmed)) {
-    return {
-      ok: false,
-      error:
-        'Đây là kiểu hiển thị trong file Excel (string"…", "{7 items"…), không phải JSON thật. Bạn mở JSON gốc rồi dán vào nha.',
+    try {
+      const template = normalizeExcelDump(trimmed, type)
+      if (!template.content && !template.buttons?.length)
+        return {
+          ok: false,
+          error:
+            'Đây là kiểu hiển thị trong Excel, nhưng tool chưa trích được nội dung/CTA nào từ đoạn bạn dán.',
+        }
+      return { ok: true, result: moderate(template), format: 'excel' }
+    } catch (e) {
+      return {
+        ok: false,
+        error:
+          'Không xử lý được đoạn copy từ Excel: ' + (e as Error).message,
+      }
     }
   }
 
@@ -199,7 +211,11 @@ function InputPanel({
         <p className="text-sm font-black text-blue-600">Mẫu tin JSON</p>
         {format && (
           <span className="text-[11px] font-bold text-zinc-500">
-            {format === 'zbs' ? 'Đã nhận: JSON ZBS' : 'Đã nhận: kiểu gọn'}
+            {format === 'zbs'
+              ? 'Đã nhận: JSON ZBS'
+              : format === 'excel'
+                ? 'Đã nhận: cell Excel'
+                : 'Đã nhận: kiểu gọn'}
           </span>
         )}
       </div>
@@ -226,7 +242,8 @@ function InputPanel({
       </div>
       <p className="text-xs font-semibold text-zinc-500">
         Dropdown trái chỉ là mẫu demo nếu chưa có JSON thật. Nếu có JSON thật,
-        dán vào ô dưới rồi chọn đúng Loại template.
+        dán vào ô dưới rồi chọn đúng Loại template. Copy nguyên cell JSON trong
+        file Excel đề bài cũng được.
       </p>
 
       <textarea
@@ -245,7 +262,7 @@ function InputPanel({
       <p className="text-xs font-semibold text-zinc-500">
         {dirty
           ? 'Bạn vừa sửa nội dung hoặc đổi Loại — bấm Kiểm tra thử ngay! để chạy lại nha.'
-          : 'Bấm Kiểm tra thử ngay! để tool đọc JSON và trả lỗi/cảnh báo.'}
+          : 'Bấm Kiểm tra thử ngay! để tool đọc JSON/cell Excel và trả lỗi/cảnh báo.'}
       </p>
     </section>
   )

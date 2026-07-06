@@ -29,7 +29,7 @@ export interface ZbsTemplate {
 }
 
 // Định dạng input mà tool nhận diện được.
-export type InputFormat = 'zbs' | 'flat'
+export type InputFormat = 'zbs' | 'flat' | 'excel'
 
 export type Severity = 'error' | 'warning'
 

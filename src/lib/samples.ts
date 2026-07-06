@@ -76,7 +76,7 @@ export const SAMPLES: Sample[] = [
     title: '#589221 · SĐT trong nội dung',
     type: 'custom',
     format: 'zbs',
-    expect: 'PHONE_IN_BODY',
+    expect: 'PHONE_IN_BODY, MISSING_IDENTIFIER',
     raw: {
       root: {
         oa_id: '267129129',

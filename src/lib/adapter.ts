@@ -2,10 +2,11 @@ import type { ZbsTemplate, ZbsButton, TemplateType, InputFormat } from './types'
 
 // ═══════════════════════════════════════════════════════════════════
 //  Input adapter — nhận diện & chuẩn hoá JSON đầu vào.
-//  Hỗ trợ 2 format:
+//  Hỗ trợ 3 format:
 //   1. JSON ZBS thật:  { "root": { "sections": [...] } }  (như sheet đề bài)
 //   2. Schema phẳng:   { "content": "...", "buttons": [...], "params": [...] }
-//  Cả hai được đưa về cùng một ZbsTemplate để chạy 10 check.
+//   3. Pseudo JSON copy từ Excel: string"...", {7 items, booltrue...
+//  Tất cả được đưa về cùng một ZbsTemplate để chạy 10 check.
 // ═══════════════════════════════════════════════════════════════════
 
 // ── Kiểu JSON đệ quy — thay cho `unknown`/`any` khi duyệt cây ────────
@@ -179,6 +180,71 @@ export function normalizeZbs(parsed: JsonObject, type: TemplateType): ZbsTemplat
     tag: tagOfType(type),
     content: stripHtml(bodyTexts.join('\n')),
     buttons: ctaUrls.map((url) => ({ url })),
+    hasLogo,
+    hasImage,
+    otpExempt: type === 'otp',
+  }
+}
+
+// ── Chuẩn hoá pseudo JSON copy trực tiếp từ file Excel đề bài ────────
+// File "Json Template.xlsx" hiển thị JSON theo dạng viewer dump:
+//   "text":string"..."
+//   "sections":[6 items
+//   "show":booltrue
+// Đây không phải JSON parse được, nhưng vẫn chứa đủ text/CTA/param để pre-check.
+function pseudoString(line: string): { key: string; value: string } | null {
+  const marker = line.match(/^"([^"]+)":string"/)
+  if (!marker) return null
+  let value = line.slice(marker[0].length)
+  if (value.endsWith('"')) value = value.slice(0, -1)
+  return { key: marker[1], value }
+}
+
+export function normalizeExcelDump(raw: string, type: TemplateType): ZbsTemplate {
+  const bodyTexts: string[] = []
+  const ctaUrls: string[] = []
+  let id: string | undefined
+  let currentSection = ''
+  let hasLogo = /"oa_info"|"logo"/.test(raw)
+  let hasImage = /"map_image"|"image"/.test(raw)
+
+  const pushUrls = (s: string): void => {
+    const matches = s.match(URL_RE)
+    if (matches) ctaUrls.push(...matches)
+  }
+
+  for (const rawLine of raw.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line) continue
+
+    if (/^\d+:\{1 item/.test(line)) currentSection = ''
+    if (/"buttons"|"c_buttons"/.test(line)) currentSection = 'buttons'
+    else if (/"map_info"/.test(line)) currentSection = 'map_info'
+    else if (/"map_image"/.test(line)) {
+      currentSection = 'image'
+      hasImage = true
+    } else if (/"banner"/.test(line)) currentSection = 'banner'
+    else if (/"oa_info"|"logo"/.test(line)) {
+      currentSection = currentSection || 'brand'
+      hasLogo = true
+    }
+
+    const found = pseudoString(line)
+    if (!found) continue
+
+    if (found.key === 'extend_info' && !id) id = found.value
+    if (CTA_URL_KEYS.has(found.key)) pushUrls(found.value)
+    if (found.key === 'text' && currentSection !== 'buttons') {
+      bodyTexts.push(found.value)
+    }
+  }
+
+  return {
+    id,
+    type,
+    tag: tagOfType(type),
+    content: stripHtml(bodyTexts.join('\n')),
+    buttons: [...new Set(ctaUrls)].map((url) => ({ url })),
     hasLogo,
     hasImage,
     otpExempt: type === 'otp',
