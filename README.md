@@ -47,6 +47,8 @@ Mình map các quy định ZBS chính thức thành các nhóm rule nội bộ:
 
 Các mã này là **mã nội bộ trong bài làm**, không phải rule ID chính thức của Zalo. Mỗi mã đều được gắn lại với nguồn gốc tương ứng như `Zalo II.1`, `Zalo II.2`, `Zalo IV`, hoặc quy định module hình ảnh.
 
+Một lưu ý nhỏ về `Voucher`: nếu hiểu voucher là mã giảm giá, ưu đãi hoặc khuyến mãi thì nó hợp với **Tag 3 - Hậu mãi** hơn Tag 2. Nhưng mình không xem câu “voucher luôn luôn là Tag 3” là tuyệt đối, vì voucher sinh nhật/quyền lợi khách hàng vẫn có thể lưng chừng với chăm sóc khách hàng tuỳ ngữ cảnh. Trong tool này, khi cần chọn default để demo, mình để `Voucher -> Tag 3` vì đây là hướng hợp lý hơn cho đa số mẫu ưu đãi.
+
 ### Bước 2 - Ưu tiên rule để tự động kiểm tra
 
 Đề bài cho phép chọn rule quan trọng để kiểm tra tự động, không yêu cầu bao phủ toàn bộ ruleset. Vì vậy mình ưu tiên các mục kiểm:

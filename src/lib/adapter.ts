@@ -45,7 +45,7 @@ const TAG_OF_TYPE: Record<TemplateType, string> = {
   payment: 'Tag 1',
   otp: 'Tag 1',
   custom: 'Tag 1',
-  voucher: 'Tag 2',
+  voucher: 'Tag 3',
   carousel: 'Tag 2',
   rating: 'Tag 2',
 }

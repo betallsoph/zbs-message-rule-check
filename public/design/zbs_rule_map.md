@@ -22,7 +22,7 @@ Ghi chú quan trọng: mã `T/G/P/S/H` trong file này là mã nội bộ của 
 
 | Mã | Nguồn | Nhóm rule | Mức tự động hoá | Ghi chú |
 |---|---|---|---|---|
-| T1 | Zalo I + bài thiết lập mục đích gửi | Chọn đúng Tag 1/2/3 theo mục đích gửi | Bán tự động | JSON không phải lúc nào cũng có Tag. Tool dùng dropdown/default để demo, nhưng thực tế người tạo mẫu nên chọn đúng mục đích gửi. |
+| T1 | Zalo I + bài thiết lập mục đích gửi | Chọn đúng Tag 1/2/3 theo mục đích gửi | Bán tự động | JSON không phải lúc nào cũng có Tag. Tool dùng dropdown/default để demo, nhưng thực tế người tạo mẫu nên chọn đúng mục đích gửi. Với voucher/ưu đãi, default của tool là Tag 3 vì thường thuộc hậu mãi/khuyến mãi; voucher sinh nhật hoặc quyền lợi khách hàng vẫn cần xem ngữ cảnh. |
 
 Tóm tắt Tag theo nguồn:
 
