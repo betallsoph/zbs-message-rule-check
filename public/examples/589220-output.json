@@ -1,5 +1,6 @@
 {
   "sample": "#589220 - Lỗi đánh máy",
+  "source": "Json Template.xlsx / Sample json / Template ID 589220",
   "templateType": "custom",
   "status": "review",
   "errors": [],
@@ -11,8 +12,7 @@
       "label": "Nghi ngờ lỗi đánh máy",
       "message": "Phát hiện từ nghi sai chính tả - cần người soát lại.",
       "evidence": [
-        "\"KÍCH HỌA\" -> nên là \"KÍCH HOẠT\"",
-        "\"quý kách\" -> nên là \"quý khách\""
+        "\"KÍCH HỌA\" -> nên là \"KÍCH HOẠT\""
       ]
     }
   ],

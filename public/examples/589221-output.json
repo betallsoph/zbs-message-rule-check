@@ -1,5 +1,6 @@
 {
-  "sample": "#589221 - Link + SĐT trong nội dung",
+  "sample": "#589221 - SĐT trong nội dung",
+  "source": "Json Template.xlsx / Sample json / Template ID 589221",
   "templateType": "custom",
   "status": "fail",
   "errors": [
@@ -10,20 +11,21 @@
       "label": "SĐT trong nội dung",
       "message": "Số điện thoại/hotline không được để trong nội dung - chỉ để ở nút bấm.",
       "evidence": [
-        "1900 6035"
+        "0901 550 112"
       ],
       "suggestion": "Đưa số điện thoại vào nút bấm gọi, đừng để trong nội dung."
     },
     {
-      "check": "URL_IN_BODY",
-      "rule": "G1",
-      "source": "Zalo II.1",
-      "label": "Link trong nội dung",
-      "message": "Link phải để ở nút bấm, không được nằm trong phần nội dung.",
+      "check": "MISSING_IDENTIFIER",
+      "rule": "P1",
+      "source": "Zalo II.2",
+      "label": "Thiếu định danh KH/giao dịch",
+      "message": "Theo mục đích gửi Tag 1, mẫu cần đủ định danh phù hợp. Đang thiếu: mã giao dịch / tham số xác định giao dịch.",
       "evidence": [
-        "https://vantai.example.vn/tracking"
+        "<customer_name>",
+        "<phone_number>"
       ],
-      "suggestion": "Đưa link vào nút bấm mở link, đừng để trong nội dung."
+      "suggestion": "Thêm ô điền tên khách và mã/xác định giao dịch, vd <customer_name> + <order_orderCode>."
     }
   ],
   "warnings": [],

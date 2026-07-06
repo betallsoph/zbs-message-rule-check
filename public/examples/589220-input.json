@@ -8,26 +8,36 @@
           "show": true,
           "vertical": true,
           "img": {
-            "url": "https://stc-oa.zdn.vn/uploads/2026/06/04/logo.png"
+            "url": "https://stc-oa.zdn.vn/uploads/2026/06/04/c65ca9ac310db3166ad96b041edf79cd.png"
           }
         }
       },
       {
         "banner": {
-          "pos": "title",
+          "pos": "2",
           "show": true,
           "title": {
-            "text": "Thông báo dịch vụ",
+            "text": "KÍCH HỌA MÃ DỰ THƯỞNG THÀNH CÔNG",
             "type": "text-title"
           }
         }
       },
       {
         "banner": {
-          "pos": "body",
+          "pos": "3",
           "show": true,
           "title": {
-            "text": "Chào <TenKH>, vui lòng KÍCH HỌA dịch vụ để tiếp tục sử dụng. Xin cảm ơn quý kách.",
+            "text": "Cảm ơn ba mẹ <span class=\"param\"><customer_name></span> đã tham gia chương trình Ra Đảo Đào Vàng cùng Mẹ và Bé Cá Mập.",
+            "type": "text-normal"
+          }
+        }
+      },
+      {
+        "banner": {
+          "pos": "4",
+          "show": true,
+          "title": {
+            "text": "Mã dự thưởng của ba mẹ đã được kích hoạt thành công. Ba mẹ vui lòng theo dõi quay số trúng thưởng vào lúc 15 giờ 00 phút ngày 21/12/2026. Trân trọng.",
             "type": "text-normal"
           }
         }
@@ -37,17 +47,30 @@
           "show_all": true,
           "items": [
             {
-              "pos": "row_0",
+              "pos": "5",
               "show": true,
               "key": {
                 "title": {
-                  "text": "Mã khách hàng"
+                  "text": "Mã đơn hàng"
                 }
               },
               "value": {
                 "title": {
-                  "text": "<MaKH>",
-                  "type": "table-effect-default"
+                  "text": "<order_code>"
+                }
+              }
+            },
+            {
+              "pos": "6",
+              "show": true,
+              "key": {
+                "title": {
+                  "text": "Trạng thái"
+                }
+              },
+              "value": {
+                "title": {
+                  "text": "<payment_status>"
                 }
               }
             }
@@ -59,12 +82,13 @@
           "show_all": true,
           "items": [
             {
-              "text": "Kích hoạt ngay",
+              "pos": 7,
+              "text": "Đến trang thông tin OA",
               "type": "button-primary",
               "click": {
                 "id": "0",
                 "action": "action.open.inapp",
-                "data": "https://sv.example.vn/activate"
+                "data": "https://oa.zalo.me/2906956084883563862"
               }
             }
           ]

@@ -93,14 +93,73 @@ Lưu ý: kết quả `ĐẠT/pass` chỉ có nghĩa là công cụ chưa tìm th
 
 ## Ví dụ đầu vào/đầu ra
 
-Các sample có sẵn trong công cụ mô phỏng những kiểu lỗi quan trọng trong file đề bài. Ngoài dropdown demo trong UI, repo cũng có cặp file input/output để người chấm mở trực tiếp:
+Các ví dụ dưới đây lấy từ sheet `Sample json` trong file `Json Template.xlsx` của đề bài. Vì cell trong Excel là dạng viewer dump (`string"..."`, `{7 items`, `booltrue`) nên repo lưu lại bản JSON chuẩn hoá từ chính các dòng sample đó để tool có thể parse và chạy được.
 
 - [`public/examples/589221-input.json`](public/examples/589221-input.json) -> [`public/examples/589221-output.json`](public/examples/589221-output.json)
 - [`public/examples/589220-input.json`](public/examples/589220-input.json) -> [`public/examples/589220-output.json`](public/examples/589220-output.json)
 
+Ví dụ 1 - `589221-input.json` (rút gọn):
+
+```json
+{
+  "root": {
+    "oa_id": "267129129",
+    "sections": [
+      { "banner": { "title": { "text": "Xin chào <customer_name>," } } },
+      {
+        "banner": {
+          "title": {
+            "text": "Mọi nhu cầu hỗ trợ tiếp theo... Thanh Xuân: 0901 550 112 để được phục vụ nhanh chóng."
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+Output:
+
+```json
+{
+  "status": "fail",
+  "errors": ["PHONE_IN_BODY", "MISSING_IDENTIFIER"],
+  "humanReviewChecklistTriggered": ["G10"]
+}
+```
+
+Ví dụ 2 - `589220-input.json` (rút gọn):
+
+```json
+{
+  "root": {
+    "oa_id": "410532407",
+    "sections": [
+      {
+        "banner": {
+          "title": {
+            "text": "KÍCH HỌA MÃ DỰ THƯỞNG THÀNH CÔNG"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+Output:
+
+```json
+{
+  "status": "review",
+  "warnings": ["SUSPICIOUS_TYPO"],
+  "humanReviewChecklistTriggered": ["G10"]
+}
+```
+
 | Template ID | Kết quả công cụ kỳ vọng |
 |---|---|
-| `589221` | `URL_IN_BODY` + `PHONE_IN_BODY` |
+| `589221` | `PHONE_IN_BODY` + `MISSING_IDENTIFIER` |
 | `588255` | `GROUP_CHAT_LINK` |
 | `589269` | `MISSING_IDENTIFIER` |
 | `589220` | `SUSPICIOUS_TYPO` |

@@ -73,25 +73,36 @@ export const SAMPLES: Sample[] = [
   },
   {
     key: '589221',
-    title: '#589221 · Link + SĐT trong nội dung',
+    title: '#589221 · SĐT trong nội dung',
     type: 'custom',
     format: 'zbs',
-    expect: 'URL_IN_BODY, PHONE_IN_BODY',
+    expect: 'PHONE_IN_BODY',
     raw: {
       root: {
         oa_id: '267129129',
         extend_info: '267129129',
         sections: [
-          oaInfo,
-          bannerTitle('Thông báo giao hàng'),
+          {
+            oa_info: {
+              show: true,
+              vertical: true,
+              img: {
+                url: 'https://stc-oa.zdn.vn/uploads/2024/10/04/2aafcc38b26c6750b96e4b62752a5277.png',
+              },
+            },
+          },
+          bannerTitle('Xin chào <customer_name>,'),
           bannerText(
-            'Đơn của quý khách đang được giao. Tra cứu tại https://vantai.example.vn/tracking hoặc gọi hotline 1900 6035 để được hỗ trợ.',
+            'Toyota Bình Dương xin trân trọng thông báo Nhân viên Lê Anh Nhựt chính thức ngừng công tác tại Toyota Bình Dương từ ngày 01/06/2026 Chúng tôi chân thành cảm ơn Quý khách đã tin tưởng và đồng hành trong suốt thời gian qua.',
+          ),
+          bannerText(
+            'Mọi nhu cầu hỗ trợ tiếp theo, Quý Khách vui lòng liên hệ hoặc nhắn tin trực tiếp qua Zalo chính thức của Toyota Bình Dương hoặc Thanh Xuân: 0901 550 112 để được phục vụ nhanh chóng. Trân trọng!',
           ),
           mapInfo([
-            ['Khách hàng', '<TenKH>'],
-            ['Mã đơn hàng', '<MaDon>'],
+            ['Tên khách hàng', '<customer_name>'],
+            ['Số điện thoại', '<phone_number>'],
           ]),
-          buttons([{ text: 'Theo dõi đơn', data: 'https://vantai.example.vn/tracking' }]),
+          buttons([{ text: 'Quan tâm OA', data: 'https://oa.zalo.me/875284821968910157' }]),
         ],
       },
     },
@@ -150,13 +161,27 @@ export const SAMPLES: Sample[] = [
         oa_id: '410532407',
         extend_info: '410532407',
         sections: [
-          oaInfo,
-          bannerTitle('Thông báo dịch vụ'),
+          {
+            oa_info: {
+              show: true,
+              vertical: true,
+              img: {
+                url: 'https://stc-oa.zdn.vn/uploads/2026/06/04/c65ca9ac310db3166ad96b041edf79cd.png',
+              },
+            },
+          },
+          bannerTitle('KÍCH HỌA MÃ DỰ THƯỞNG THÀNH CÔNG'),
           bannerText(
-            'Chào <TenKH>, vui lòng KÍCH HỌA dịch vụ để tiếp tục sử dụng. Xin cảm ơn quý kách.',
+            'Cảm ơn ba mẹ <span class="param"><customer_name></span> đã tham gia chương trình Ra Đảo Đào Vàng cùng Mẹ và Bé Cá Mập.',
           ),
-          mapInfo([['Mã khách hàng', '<MaKH>']]),
-          buttons([{ text: 'Kích hoạt ngay', data: 'https://sv.example.vn/activate' }]),
+          bannerText(
+            'Mã dự thưởng của ba mẹ đã được kích hoạt thành công. Ba mẹ vui lòng theo dõi quay số trúng thưởng vào lúc 15 giờ 00 phút ngày 21/12/2026. Trân trọng.',
+          ),
+          mapInfo([
+            ['Mã đơn hàng', '<order_code>'],
+            ['Trạng thái', '<payment_status>'],
+          ]),
+          buttons([{ text: 'Đến trang thông tin OA', data: 'https://oa.zalo.me/2906956084883563862' }]),
         ],
       },
     },

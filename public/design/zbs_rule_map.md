@@ -89,8 +89,8 @@ Tiêu chí chọn rule để code:
 | Ưu tiên | Mục kiểm trong tool | Mã | Nguồn | Vì sao ưu tiên | Sample đối chiếu |
 |---|---|---|---|---|---|
 | 1 | `MISSING_IDENTIFIER` | P1 | Zalo II.2 | Reject nhiều trong sheet, gồm custom và voucher | 589269, 588835, 587432 |
-| 2 | `URL_IN_BODY` | G1 | Zalo II.1 | Regex rõ, lỗi reject thật | 589221 |
-| 3 | `PHONE_IN_BODY` | G2 | Zalo II.1 | Regex rõ, cùng case reject với link | 589221 |
+| 2 | `URL_IN_BODY` | G1 | Zalo II.1 | Regex rõ, lỗi reject thật | 589221 theo lý do reject trong sheet |
+| 3 | `PHONE_IN_BODY` | G2 | Zalo II.1 | Regex rõ, cùng case reject với link | 589221 input/output |
 | 4 | `GROUP_CHAT_LINK` | G4 | Zalo II.1 | Blacklist domain rõ, dễ bắt từ CTA/link | 588255 |
 | 5 | `SUSPICIOUS_TYPO` | G7 | Zalo II.1 | Có typo reject thật, dùng từ điển hẹp để tránh báo nhầm | 589220 |
 | 6 | `WORDING` | P4 | Zalo II.2 | Có wording reject thật | 588636 |
@@ -118,7 +118,7 @@ Input tool hỗ trợ:
 - JSON ZBS chuẩn: object có `root.sections[]`.
 - Schema demo dạng phẳng: `{ content, buttons, params, tag }`.
 - Pseudo JSON trong Excel (`string"..."`, `{7 items`, `booltrue`) được coi là invalid input để test error handling.
-- Ví dụ input/output cụ thể nằm trong `public/examples/`, gồm:
+- Ví dụ input/output cụ thể nằm trong `public/examples/`. Các file này lấy từ sheet `Sample json` trong file `Json Template.xlsx` của đề bài và được chuẩn hoá thành JSON parse được:
   - `589221-input.json` -> `589221-output.json`
   - `589220-input.json` -> `589220-output.json`
 

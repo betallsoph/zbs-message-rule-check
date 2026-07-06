@@ -8,26 +8,36 @@
           "show": true,
           "vertical": true,
           "img": {
-            "url": "https://stc-oa.zdn.vn/uploads/2026/06/04/logo.png"
+            "url": "https://stc-oa.zdn.vn/uploads/2024/10/04/2aafcc38b26c6750b96e4b62752a5277.png"
           }
         }
       },
       {
         "banner": {
-          "pos": "title",
+          "pos": "2",
           "show": true,
           "title": {
-            "text": "Thông báo giao hàng",
+            "text": "Xin chào <customer_name>,",
             "type": "text-title"
           }
         }
       },
       {
         "banner": {
-          "pos": "body",
+          "pos": "3",
           "show": true,
           "title": {
-            "text": "Đơn của quý khách đang được giao. Tra cứu tại https://vantai.example.vn/tracking hoặc gọi hotline 1900 6035 để được hỗ trợ.",
+            "text": "Toyota Bình Dương xin trân trọng thông báo Nhân viên Lê Anh Nhựt chính thức ngừng công tác tại Toyota Bình Dương từ ngày 01/06/2026 Chúng tôi chân thành cảm ơn Quý khách đã tin tưởng và đồng hành trong suốt thời gian qua.",
+            "type": "text-normal"
+          }
+        }
+      },
+      {
+        "banner": {
+          "pos": "4",
+          "show": true,
+          "title": {
+            "text": "Mọi nhu cầu hỗ trợ tiếp theo, Quý Khách vui lòng liên hệ hoặc nhắn tin trực tiếp qua Zalo chính thức của Toyota Bình Dương hoặc Thanh Xuân: 0901 550 112 để được phục vụ nhanh chóng. Trân trọng!",
             "type": "text-normal"
           }
         }
@@ -37,32 +47,30 @@
           "show_all": true,
           "items": [
             {
-              "pos": "row_0",
+              "pos": "5",
               "show": true,
               "key": {
                 "title": {
-                  "text": "Khách hàng"
+                  "text": "Tên khách hàng"
                 }
               },
               "value": {
                 "title": {
-                  "text": "<TenKH>",
-                  "type": "table-effect-default"
+                  "text": "<customer_name>"
                 }
               }
             },
             {
-              "pos": "row_1",
+              "pos": "6",
               "show": true,
               "key": {
                 "title": {
-                  "text": "Mã đơn hàng"
+                  "text": "Số điện thoại"
                 }
               },
               "value": {
                 "title": {
-                  "text": "<MaDon>",
-                  "type": "table-effect-default"
+                  "text": "<phone_number>"
                 }
               }
             }
@@ -74,12 +82,13 @@
           "show_all": true,
           "items": [
             {
-              "text": "Theo dõi đơn",
+              "pos": 7,
+              "text": "Quan tâm OA",
               "type": "button-primary",
               "click": {
                 "id": "0",
                 "action": "action.open.inapp",
-                "data": "https://vantai.example.vn/tracking"
+                "data": "https://oa.zalo.me/875284821968910157"
               }
             }
           ]
