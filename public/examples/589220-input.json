@@ -1,0 +1,75 @@
+{
+  "root": {
+    "oa_id": "410532407",
+    "extend_info": "410532407",
+    "sections": [
+      {
+        "oa_info": {
+          "show": true,
+          "vertical": true,
+          "img": {
+            "url": "https://stc-oa.zdn.vn/uploads/2026/06/04/logo.png"
+          }
+        }
+      },
+      {
+        "banner": {
+          "pos": "title",
+          "show": true,
+          "title": {
+            "text": "Thông báo dịch vụ",
+            "type": "text-title"
+          }
+        }
+      },
+      {
+        "banner": {
+          "pos": "body",
+          "show": true,
+          "title": {
+            "text": "Chào <TenKH>, vui lòng KÍCH HỌA dịch vụ để tiếp tục sử dụng. Xin cảm ơn quý kách.",
+            "type": "text-normal"
+          }
+        }
+      },
+      {
+        "map_info": {
+          "show_all": true,
+          "items": [
+            {
+              "pos": "row_0",
+              "show": true,
+              "key": {
+                "title": {
+                  "text": "Mã khách hàng"
+                }
+              },
+              "value": {
+                "title": {
+                  "text": "<MaKH>",
+                  "type": "table-effect-default"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "buttons": {
+          "show_all": true,
+          "items": [
+            {
+              "text": "Kích hoạt ngay",
+              "type": "button-primary",
+              "click": {
+                "id": "0",
+                "action": "action.open.inapp",
+                "data": "https://sv.example.vn/activate"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

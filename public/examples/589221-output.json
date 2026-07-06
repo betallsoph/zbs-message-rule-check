@@ -1,0 +1,38 @@
+{
+  "sample": "#589221 - Link + SĐT trong nội dung",
+  "templateType": "custom",
+  "status": "fail",
+  "errors": [
+    {
+      "check": "PHONE_IN_BODY",
+      "rule": "G2",
+      "source": "Zalo II.1",
+      "label": "SĐT trong nội dung",
+      "message": "Số điện thoại/hotline không được để trong nội dung - chỉ để ở nút bấm.",
+      "evidence": [
+        "1900 6035"
+      ],
+      "suggestion": "Đưa số điện thoại vào nút bấm gọi, đừng để trong nội dung."
+    },
+    {
+      "check": "URL_IN_BODY",
+      "rule": "G1",
+      "source": "Zalo II.1",
+      "label": "Link trong nội dung",
+      "message": "Link phải để ở nút bấm, không được nằm trong phần nội dung.",
+      "evidence": [
+        "https://vantai.example.vn/tracking"
+      ],
+      "suggestion": "Đưa link vào nút bấm mở link, đừng để trong nội dung."
+    }
+  ],
+  "warnings": [],
+  "humanReviewChecklistTriggered": [
+    {
+      "rule": "G10",
+      "source": "Zalo II.1",
+      "label": "Quyền sở hữu logo",
+      "hint": "Mẫu có logo/ảnh thương hiệu - cần giấy tờ chứng minh quyền sử dụng."
+    }
+  ]
+}

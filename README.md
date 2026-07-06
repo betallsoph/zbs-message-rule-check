@@ -27,6 +27,7 @@ Sau khi chạy `npm run dev`, mở URL local của Vite. Có thể chọn mẫu 
 ## Các phần nộp
 
 - Rule map: [`public/design/zbs_rule_map.md`](public/design/zbs_rule_map.md)
+- Ví dụ đầu vào/đầu ra: [`public/examples/`](public/examples/)
 - Code chính của công cụ:
   - `src/lib/adapter.ts` - đọc và chuẩn hoá JSON đầu vào
   - `src/lib/rules.ts` - bộ chạy rule, các mục kiểm ưu tiên và checklist người kiểm
@@ -92,7 +93,10 @@ Lưu ý: kết quả `ĐẠT/pass` chỉ có nghĩa là công cụ chưa tìm th
 
 ## Ví dụ đầu vào/đầu ra
 
-Các sample có sẵn trong công cụ mô phỏng những kiểu lỗi quan trọng trong file đề bài:
+Các sample có sẵn trong công cụ mô phỏng những kiểu lỗi quan trọng trong file đề bài. Ngoài dropdown demo trong UI, repo cũng có cặp file input/output để người chấm mở trực tiếp:
+
+- [`public/examples/589221-input.json`](public/examples/589221-input.json) -> [`public/examples/589221-output.json`](public/examples/589221-output.json)
+- [`public/examples/589220-input.json`](public/examples/589220-input.json) -> [`public/examples/589220-output.json`](public/examples/589220-output.json)
 
 | Template ID | Kết quả công cụ kỳ vọng |
 |---|---|

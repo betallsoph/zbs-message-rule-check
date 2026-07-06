@@ -1,0 +1,27 @@
+{
+  "sample": "#589220 - Lỗi đánh máy",
+  "templateType": "custom",
+  "status": "review",
+  "errors": [],
+  "warnings": [
+    {
+      "check": "SUSPICIOUS_TYPO",
+      "rule": "G7",
+      "source": "Zalo II.1",
+      "label": "Nghi ngờ lỗi đánh máy",
+      "message": "Phát hiện từ nghi sai chính tả - cần người soát lại.",
+      "evidence": [
+        "\"KÍCH HỌA\" -> nên là \"KÍCH HOẠT\"",
+        "\"quý kách\" -> nên là \"quý khách\""
+      ]
+    }
+  ],
+  "humanReviewChecklistTriggered": [
+    {
+      "rule": "G10",
+      "source": "Zalo II.1",
+      "label": "Quyền sở hữu logo",
+      "hint": "Mẫu có logo/ảnh thương hiệu - cần giấy tờ chứng minh quyền sử dụng."
+    }
+  ]
+}

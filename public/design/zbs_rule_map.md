@@ -118,6 +118,9 @@ Input tool hỗ trợ:
 - JSON ZBS chuẩn: object có `root.sections[]`.
 - Schema demo dạng phẳng: `{ content, buttons, params, tag }`.
 - Pseudo JSON trong Excel (`string"..."`, `{7 items`, `booltrue`) được coi là invalid input để test error handling.
+- Ví dụ input/output cụ thể nằm trong `public/examples/`, gồm:
+  - `589221-input.json` -> `589221-output.json`
+  - `589220-input.json` -> `589220-output.json`
 
 Output:
 

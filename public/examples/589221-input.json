@@ -1,0 +1,90 @@
+{
+  "root": {
+    "oa_id": "267129129",
+    "extend_info": "267129129",
+    "sections": [
+      {
+        "oa_info": {
+          "show": true,
+          "vertical": true,
+          "img": {
+            "url": "https://stc-oa.zdn.vn/uploads/2026/06/04/logo.png"
+          }
+        }
+      },
+      {
+        "banner": {
+          "pos": "title",
+          "show": true,
+          "title": {
+            "text": "Thông báo giao hàng",
+            "type": "text-title"
+          }
+        }
+      },
+      {
+        "banner": {
+          "pos": "body",
+          "show": true,
+          "title": {
+            "text": "Đơn của quý khách đang được giao. Tra cứu tại https://vantai.example.vn/tracking hoặc gọi hotline 1900 6035 để được hỗ trợ.",
+            "type": "text-normal"
+          }
+        }
+      },
+      {
+        "map_info": {
+          "show_all": true,
+          "items": [
+            {
+              "pos": "row_0",
+              "show": true,
+              "key": {
+                "title": {
+                  "text": "Khách hàng"
+                }
+              },
+              "value": {
+                "title": {
+                  "text": "<TenKH>",
+                  "type": "table-effect-default"
+                }
+              }
+            },
+            {
+              "pos": "row_1",
+              "show": true,
+              "key": {
+                "title": {
+                  "text": "Mã đơn hàng"
+                }
+              },
+              "value": {
+                "title": {
+                  "text": "<MaDon>",
+                  "type": "table-effect-default"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "buttons": {
+          "show_all": true,
+          "items": [
+            {
+              "text": "Theo dõi đơn",
+              "type": "button-primary",
+              "click": {
+                "id": "0",
+                "action": "action.open.inapp",
+                "data": "https://vantai.example.vn/tracking"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
